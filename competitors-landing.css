@@ -185,11 +185,30 @@ body.past-hero .header-cta {
   will-change: transform;
 }
 
-/* ============ SECTIONS ============ */
+/* ============ CHROME PINNED TO THE TOP ============
+   Fixed rather than sticky: both bars live inside .hero-zone, and a sticky element
+   stops sticking once its own container scrolls past, so the header would have
+   vanished at the FAQ. The zone reserves their height so nothing starts under
+   them, and both are opaque because content now scrolls beneath. */
+.utility-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 51; }
+.site-header {
+  position: fixed; top: var(--utility-h); left: 0; right: 0; z-index: 50;
+  background: #14120E;
+}
+.hero-zone { padding-top: calc(var(--utility-h) + var(--header-h)); }
+
+/* ============ SECTIONS ============
+   The page snaps to whichever section is nearest, so a scroll gesture lands on a
+   section rather than between two. `proximity`, not `mandatory`: the FAQ and the
+   footer are taller than the viewport and mandatory would drag the reader back to
+   their tops. The snap area honours scroll-margin, so a section stops below the
+   fixed chrome, not under it. */
+html { scroll-snap-type: y proximity; }
 .h-track { position: relative; z-index: 1; }
 .panel {
   position: relative;
   background: transparent;
+  scroll-snap-align: start;
   /* The chrome is fixed, so a plain scrollIntoView parks a section's top under
      it and the heading lands behind the header. */
   scroll-margin-top: calc(var(--utility-h) + var(--header-h));
@@ -844,18 +863,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
    background), with a stronger bottom-up scrim on each panel for legibility. */
 /* ============ PHONE REFINEMENTS ============ */
 @media (max-width: 900px) {
-  /* Chrome pinned to the top for the whole page. Fixed rather than sticky because
-     both bars live inside .hero-zone, and a sticky element stops sticking once
-     its own container scrolls past: the header would have vanished at the FAQ.
-     The zone reserves their height so nothing starts underneath them. */
-  .utility-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 51; }
-  /* Fully opaque now that content scrolls under it: at 0.96 the headline ghosted
-     through the bar. */
-  .site-header {
-    position: fixed; top: var(--utility-h); left: 0; right: 0; z-index: 50;
-    background: #14120E;
-  }
-  .hero-zone { padding-top: calc(var(--utility-h) + var(--header-h)); }
   .faq-form-grid { grid-template-columns: 1fr; }
   .footer-license { text-align: left; }
 
@@ -989,9 +996,14 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .hero-content { margin-inline: 0; }
 
   /* P2 stops being a transparent panel over the scene and becomes its own dark
-     section, so the six cards read as a set instead of floating on the art. */
-  .panel--compare { background: var(--bg-dark); }
-  .compare-inner { display: block; padding: clamp(56px, 9vh, 96px) clamp(24px, 5vw, 64px); }
+     section, so the six cards read as a set instead of floating on the art. It
+     matches the hero's height so the snap lands on a full screen either way. */
+  .panel--compare {
+    background: var(--bg-dark);
+    min-height: calc(100svh - var(--utility-h) - var(--header-h));
+    display: flex; align-items: center;
+  }
+  .compare-inner { display: block; width: 100%; padding: clamp(40px, 6vh, 72px) clamp(24px, 5vw, 64px); }
   .compare-content { max-width: none; }
   .compare-head { max-width: 780px; margin-bottom: clamp(28px, 4vh, 44px); }
   /* All six advantages on screen at once: three across, two deep. */
