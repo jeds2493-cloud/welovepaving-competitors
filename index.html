@@ -109,6 +109,10 @@
   <!-- ===== P1 · HERO ===== -->
   <section class="panel panel--hero" aria-label="Hero">
     <div class="panel-scrim scrim--left"></div>
+    <!-- Light rays fanning out of the top-left corner. Vanilla WebGL port of
+         React Bits' <SideRays>; it sits above the scrim and below the copy, and
+         stays empty if WebGL is unavailable. -->
+    <div class="side-rays" data-side-rays aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-content">
         <p class="eyebrow">Comparing commercial paving contractors?</p>

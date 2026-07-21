@@ -289,6 +289,15 @@ html { scroll-snap-type: y proximity; }
 /* P2 carries its own solid background now; nothing shows through. */
 .scrim--right { display: none; }
 
+/* ============ SIDE RAYS (hero) ============
+   Above the scrim so the light reads, below .hero-inner (z 4) so it never sits on
+   the copy, and below the chrome (z 50/51) so it stops at the header. */
+.side-rays {
+  position: absolute; inset: 0; z-index: 2;
+  pointer-events: none; overflow: hidden;
+}
+.side-rays canvas { width: 100%; height: 100%; display: block; }
+
 /* ============ P1 · HERO ============ */
 /* The copy drifts a touch opposite the cursor for a subtle layered feel with the
    scene behind it (desktop pointer only, off under reduced motion). --px/--py

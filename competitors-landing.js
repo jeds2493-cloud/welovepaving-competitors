@@ -473,6 +473,183 @@ if (heroPanel) {
   }, { passive: false });
 }
 
+/* ---------- Side rays (hero) ----------
+   Vanilla WebGL port of React Bits' <SideRays>. The original leans on ogl and
+   React; this landing has no build step and no dependencies, so the shader is
+   driven directly: one full-screen triangle, a handful of uniforms and a rAF
+   loop. Same fragment shader, same maths.
+
+   It is a decoration, so everything about it is conditional: no WebGL, no rays;
+   reduced motion, the clock never advances; off screen, the loop stops. */
+const RAYS = {
+  speed: 1.6,
+  color1: '#F2C230',        // WLP yellow
+  color2: '#FFE9A8',        // pale gold — the original's blue fights the palette
+  intensity: 2.4,
+  spread: 1.8,
+  origin: 'top-left',
+  tilt: 0,
+  saturation: 1.25,
+  blend: 0.55,
+  falloff: 1.35,          // shallower than the default: a wider, softer glow
+  opacity: 0.95,
+};
+
+const raysHost = document.querySelector('[data-side-rays]');
+if (raysHost) initSideRays(raysHost, RAYS);
+
+function initSideRays(host, opt) {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl', { alpha: true, antialias: false, premultipliedAlpha: false });
+  if (!gl) return;                                  // no WebGL: the div stays empty
+
+  const hexToRgb = (hex) => {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return m ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255] : [1, 1, 1];
+  };
+  const flipFor = (origin) => ({
+    'top-left': [1, 0], 'bottom-right': [0, 1], 'bottom-left': [1, 1],
+  }[origin] || [0, 0]);
+
+  const VERT = `
+    attribute vec2 position;
+    void main() { gl_Position = vec4(position, 0.0, 1.0); }`;
+
+  const FRAG = `precision highp float;
+    uniform float iTime;
+    uniform vec2 iResolution;
+    uniform float iSpeed;
+    uniform vec3 iRayColor1;
+    uniform vec3 iRayColor2;
+    uniform float iIntensity;
+    uniform float iSpread;
+    uniform float iFlipX;
+    uniform float iFlipY;
+    uniform float iTilt;
+    uniform float iSaturation;
+    uniform float iBlend;
+    uniform float iFalloff;
+    uniform float iOpacity;
+
+    float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord, float seedA, float seedB, float speed) {
+      vec2 sourceToCoord = coord - raySource;
+      float cosAngle = dot(normalize(sourceToCoord), rayRefDirection);
+      return clamp(
+        (0.45 + 0.15 * sin(cosAngle * seedA + iTime * speed)) +
+        (0.3 + 0.2 * cos(-cosAngle * seedB + iTime * speed)),
+        0.0, 1.0) *
+        clamp((iResolution.x - length(sourceToCoord)) / iResolution.x, 0.5, 1.0);
+    }
+
+    void main() {
+      vec2 fragCoord = gl_FragCoord.xy;
+      if (iFlipX > 0.5) fragCoord.x = iResolution.x - fragCoord.x;
+      if (iFlipY > 0.5) fragCoord.y = iResolution.y - fragCoord.y;
+
+      vec2 coord = vec2(fragCoord.x, iResolution.y - fragCoord.y);
+      vec2 rayPos = vec2(iResolution.x * 1.1, -0.5 * iResolution.y);
+
+      float tiltRad = iTilt * 3.14159265 / 180.0;
+      float cs = cos(tiltRad);
+      float sn = sin(tiltRad);
+      vec2 rel = coord - rayPos;
+      vec2 tiltedCoord = vec2(rel.x * cs - rel.y * sn, rel.x * sn + rel.y * cs) + rayPos;
+
+      float halfSpread = iSpread * 0.275;
+      vec2 rayRefDir1 = normalize(vec2(cos(0.785398 + halfSpread), sin(0.785398 + halfSpread)));
+      vec2 rayRefDir2 = normalize(vec2(cos(0.785398 - halfSpread), sin(0.785398 - halfSpread)));
+
+      vec4 rays1 = vec4(iRayColor1, 1.0) * rayStrength(rayPos, rayRefDir1, tiltedCoord, 36.2214, 21.11349, iSpeed);
+      vec4 rays2 = vec4(iRayColor2, 1.0) * rayStrength(rayPos, rayRefDir2, tiltedCoord, 22.3991, 18.0234, iSpeed * 0.2);
+
+      vec4 color = rays1 * (1.0 - iBlend) * 0.9 + rays2 * iBlend * 0.9;
+
+      float distanceToLight = length(fragCoord.xy - vec2(rayPos.x, iResolution.y - rayPos.y)) / iResolution.y;
+      float brightness = iIntensity * 0.4 / pow(max(distanceToLight, 0.001), iFalloff);
+      color.rgb *= brightness;
+
+      float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+      color.rgb = mix(vec3(gray), color.rgb, iSaturation);
+
+      color.a = max(color.r, max(color.g, color.b)) * iOpacity;
+      gl_FragColor = color;
+    }`;
+
+  const compile = (type, src) => {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
+  };
+  const vs = compile(gl.VERTEX_SHADER, VERT);
+  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return;
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  gl.useProgram(prog);
+
+  // One oversized triangle covers the viewport with no seam down the diagonal.
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'position');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  const u = (n) => gl.getUniformLocation(prog, n);
+  const uTime = u('iTime');
+  const uRes = u('iResolution');
+  const [flipX, flipY] = flipFor(opt.origin);
+  gl.uniform1f(u('iSpeed'), opt.speed);
+  gl.uniform3fv(u('iRayColor1'), hexToRgb(opt.color1));
+  gl.uniform3fv(u('iRayColor2'), hexToRgb(opt.color2));
+  gl.uniform1f(u('iIntensity'), opt.intensity);
+  gl.uniform1f(u('iSpread'), opt.spread);
+  gl.uniform1f(u('iFlipX'), flipX);
+  gl.uniform1f(u('iFlipY'), flipY);
+  gl.uniform1f(u('iTilt'), opt.tilt);
+  gl.uniform1f(u('iSaturation'), opt.saturation);
+  gl.uniform1f(u('iBlend'), opt.blend);
+  gl.uniform1f(u('iFalloff'), opt.falloff);
+  gl.uniform1f(u('iOpacity'), opt.opacity);
+
+  host.appendChild(canvas);
+
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(host.clientWidth, 1);
+    const h = Math.max(host.clientHeight, 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+  };
+  resize();
+  new ResizeObserver(resize).observe(host);
+
+  let raf = 0;
+  const draw = (t) => {
+    // Reduced motion keeps the rays, just frozen: the shape is decoration, the
+    // movement is what people ask not to see.
+    gl.uniform1f(uTime, reducedMQ.matches ? 0 : t * 0.001);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    raf = requestAnimationFrame(draw);
+  };
+  const start = () => { if (!raf) raf = requestAnimationFrame(draw); };
+  const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } };
+
+  // Nothing renders while the hero is off screen or the tab is in the background.
+  new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.01 }).observe(host);
+  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+}
+
 /* ---------- Card reveals ----------
    The comparison cards slide in from alternating sides, the service cards rise;
    both are driven from here and the shapes live in CSS. The observer disconnects
