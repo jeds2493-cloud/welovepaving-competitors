@@ -378,6 +378,9 @@ if (svcModal) {
     leadCard.parentNode.insertBefore(slot, leadCard);
     host.appendChild(leadCard);
 
+    // The embed is loaded on demand; opening the modal is the clearest signal.
+    if (typeof window.wlpLoadForms === 'function') window.wlpLoadForms();
+
     svcModal.hidden = false;
     document.documentElement.classList.add('svc-open');
     if (scrim.animate && !reducedMQ.matches) {

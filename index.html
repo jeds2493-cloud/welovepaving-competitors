@@ -18,8 +18,8 @@
 <link rel="icon" type="image/png" href="images/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap"></noscript>
 <link rel="stylesheet" href="competitors-landing.css">
 <link rel="preload" as="image" href="images/hero-bg.webp" media="(min-width: 901px)" fetchpriority="high">
 <link rel="preload" as="image" href="images/hero-bg-mobile.webp" media="(max-width: 900px)" fetchpriority="high">
@@ -263,7 +263,7 @@
             <p>Grading, base repair and paving by our own crews, built for the traffic your lot actually carries.</p>
           </div>
           <div class="cond-media">
-            <img src="images/svc-asphalt.webp" alt="A freshly paved commercial drive and parking area at a office building" width="1200" height="571" loading="lazy" decoding="async">
+            <img src="images/svc-asphalt.webp" alt="A freshly paved commercial drive and parking area at a office building" width="760" height="362" loading="lazy" decoding="async">
           </div>
           <div class="cond-foot">
             <a href="#p3-form" class="cond-link" data-svc-request="Asphalt Paving">REQUEST THIS SERVICE <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
@@ -276,7 +276,7 @@
             <p>Ramps, curbs and walkways poured in house, tied into the paving instead of handed to a second contractor.</p>
           </div>
           <div class="cond-media">
-            <img src="images/svc-concrete.webp" alt="A wide poured concrete walkway running along a commercial building and its parking lot" width="1200" height="571" loading="lazy" decoding="async">
+            <img src="images/svc-concrete.webp" alt="A wide poured concrete walkway running along a commercial building and its parking lot" width="760" height="362" loading="lazy" decoding="async">
           </div>
           <div class="cond-foot">
             <a href="#p3-form" class="cond-link" data-svc-request="Concrete Contractors">REQUEST THIS SERVICE <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
@@ -289,7 +289,7 @@
             <p>Applied on schedule and at the right coverage, so the surface you already paid for keeps its life instead of oxidizing early.</p>
           </div>
           <div class="cond-media">
-            <img src="images/svc-sealcoating.webp" alt="A freshly sealcoated and striped retail parking lot" width="1200" height="571" loading="lazy" decoding="async">
+            <img src="images/svc-sealcoating.webp" alt="A freshly sealcoated and striped retail parking lot" width="760" height="362" loading="lazy" decoding="async">
           </div>
           <div class="cond-foot">
             <a href="#p3-form" class="cond-link" data-svc-request="Sealcoating">REQUEST THIS SERVICE <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
@@ -302,7 +302,7 @@
             <p>Striping, ramps, signage and truncated domes corrected together, so an inspection is not a second project.</p>
           </div>
           <div class="cond-media">
-            <img src="images/svc-ada.webp" alt="An accessible parking stall with the ADA symbol and a ramp leading to the entrance" width="1200" height="571" loading="lazy" decoding="async">
+            <img src="images/svc-ada.webp" alt="An accessible parking stall with the ADA symbol and a ramp leading to the entrance" width="760" height="355" loading="lazy" decoding="async">
           </div>
           <div class="cond-foot">
             <a href="#p3-form" class="cond-link" data-svc-request="ADA Compliance">REQUEST THIS SERVICE <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
@@ -493,19 +493,39 @@
   </a>
 </div>
 
-<!-- Load the WLP form library after the page settles (each iframe pulls a heavy
-     asset; deferring avoids LCP/bandwidth hits). Space is reserved via data-min. -->
+<!-- The WLP form library is loaded on demand, not on page load. Its embed pulls
+     ~1.3MB (a panda.png alone) plus a third-party analytics script, which on a
+     throttled phone was over half the page's bytes competing with the hero for
+     bandwidth. Nothing here is needed until someone is heading for the form, so
+     it is fetched at the first sign of that: any real interaction, the lead card
+     coming into view, or a CTA opening the modal (competitors-landing.js calls
+     window.wlpLoadForms directly). Space is reserved via data-min either way. -->
 <script>
   (function () {
+    var asked = false;
     function loadForms() {
+      if (asked) return;
+      asked = true;
       var s = document.createElement('script');
       s.src = 'https://quote.welovepaving.com/loader.js';
       s.defer = true;
       document.body.appendChild(s);
     }
-    var whenIdle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1); };
-    if (document.readyState === 'complete') whenIdle(loadForms);
-    else window.addEventListener('load', function () { whenIdle(loadForms); }, { once: true });
+    window.wlpLoadForms = loadForms;
+
+    var opts = { once: true, passive: true, capture: true };
+    ['pointerdown', 'keydown', 'touchstart', 'wheel'].forEach(function (t) {
+      window.addEventListener(t, loadForms, opts);
+    });
+
+    // Or as soon as the in-page form is within a screen of the viewport.
+    var card = document.getElementById('p3-form');
+    if (card && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { loadForms(); io.disconnect(); }
+      }, { rootMargin: '100% 0px' });
+      io.observe(card);
+    }
   })();
 </script>
 <script src="competitors-landing.js"></script>

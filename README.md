@@ -73,6 +73,22 @@ to a welovepaving domain.
   embed would mean a second iframe and a second conversion tag.
 - **Legal modals**: same component as the striping and concrete landings.
 
+## Performance
+
+The form embed is **not** loaded on page load. It pulls ~1.3MB — a `panda.png`
+alone — plus a third-party analytics script, which on a throttled phone was more
+than half the page's bytes competing with the hero for bandwidth. It is fetched at
+the first sign someone is heading for the form: any real interaction, the lead
+card coming within a screen of the viewport, or a CTA opening the modal. The
+inline loader exposes `window.wlpLoadForms()` for that last case.
+
+Images are sized to what they are actually displayed at, not to the source. If
+you regenerate one, keep the `width`/`height` attributes in step — they reserve
+the box and stop the layout shifting.
+
+The Google Fonts request only asks for the weights the CSS uses. Adding a
+`font-weight` that is not in that list gets a synthesised face, not a real one.
+
 ## Legal documents
 
 `legal/*.html` are flattened local copies, not the live pages. Fetching
