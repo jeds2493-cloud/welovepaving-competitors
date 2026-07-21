@@ -165,6 +165,26 @@ body.past-hero .header-cta {
   max-width: 280px; margin-left: 18px; padding-left: 18px; padding-right: 18px;
   opacity: 1; pointer-events: auto; transform: translateX(0);
 }
+/* The header handset rocks every few seconds, the way a phone does when it
+   rings: two quick shakes, then a long pause so it reads as a cue and not as a
+   loop. transform-origin at the top so it pivots like a bell, not a windscreen
+   wiper. */
+@keyframes ring {
+  0%, 72%, 100% { transform: rotate(0); }
+  74%  { transform: rotate(-14deg); }
+  77%  { transform: rotate(12deg); }
+  80%  { transform: rotate(-10deg); }
+  83%  { transform: rotate(8deg); }
+  86%  { transform: rotate(-5deg); }
+  89%  { transform: rotate(3deg); }
+  92%  { transform: rotate(0); }
+}
+.icon-ring {
+  transform-origin: 50% 15%;
+  animation: ring 4s var(--ease-mech) infinite;
+}
+@media (prefers-reduced-motion: reduce) { .icon-ring { animation: none; } }
+
 .header-phone { text-align: right; }
 .header-phone-label {
   display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 600;
@@ -438,7 +458,7 @@ html { scroll-snap-type: y proximity; }
 }
 .pledge-head h2 {
   font-size: clamp(24px, 2.9vw, 42px); line-height: 1.02; font-weight: 900;
-  text-transform: uppercase; color: #fff;
+  text-transform: uppercase; color: var(--yellow);
 }
 .pledge-head h2 .hl,
 .compare-content h2 .hl { color: var(--yellow); }
@@ -525,6 +545,22 @@ html { scroll-snap-type: y proximity; }
   }
   .compare-card:nth-child(even) { transform: translateX(48px); }
   .compare-card.is-in { opacity: 1; transform: none; }
+}
+
+/* ============ P3 SERVICE CARD REVEAL ============
+   They sit in one row, so an observer fires them all at once; the stagger comes
+   from a per-card delay. They rise rather than slide: the comparison cards
+   already own the sideways entrance and two of those in a row read as a tic. */
+@media (prefers-reduced-motion: no-preference) {
+  .cond-card {
+    opacity: 0;
+    transform: translateY(34px);
+    transition: transform 600ms var(--ease-bounce), opacity 300ms var(--ease-mech);
+  }
+  .cond-card.is-in { opacity: 1; transform: none; }
+  .cond-card:nth-child(2) { transition-delay: 90ms; }
+  .cond-card:nth-child(3) { transition-delay: 180ms; }
+  .cond-card:nth-child(4) { transition-delay: 270ms; }
 }
 
 /* ============ P2 CARD HOVER ============

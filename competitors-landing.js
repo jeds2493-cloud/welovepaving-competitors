@@ -473,10 +473,11 @@ if (heroPanel) {
   }, { passive: false });
 }
 
-/* ---------- P2 · card reveal ----------
-   Each card slides in from alternating sides as it reaches the viewport. The
-   observer disconnects on the first hit: this is an entrance, not a toggle. */
-document.querySelectorAll('.compare-card').forEach((card) => {
+/* ---------- Card reveals ----------
+   The comparison cards slide in from alternating sides, the service cards rise;
+   both are driven from here and the shapes live in CSS. The observer disconnects
+   on the first hit: this is an entrance, not a toggle. */
+document.querySelectorAll('.compare-card, .cond-card').forEach((card) => {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => {
       if (!en.isIntersecting) return;
