@@ -721,6 +721,20 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 .svc-modal__body .lead-card h2 { padding-right: 44px; }
 .svc-modal__eyebrow:not([hidden]) + .svc-modal__body .lead-card h2 { padding-right: 0; }
 
+/* Full screen on a phone. A centred sheet had to guess how much room the browser
+   chrome was taking and got it wrong whenever the toolbars moved; covering the
+   viewport outright removes the guess. The overlay is fixed at inset 0, which is
+   the visible area, so the panel simply fills it. */
+@media (max-width: 900px) {
+  .svc-modal { padding: 0; }
+  .svc-modal__panel {
+    width: 100%; height: 100%; max-height: none;
+    border-radius: 0; border: none; box-shadow: none;
+    padding: calc(16px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
+  }
+  .svc-modal__close { top: calc(10px + env(safe-area-inset-top)); right: 12px; }
+}
+
 /* ============ BORDER GLOW on the P2 cards ============
    Vanilla port of React Bits <BorderGlow> (same as the Panda Pledge cards on the
    other landings), recoloured to WLP gold. Pointer proximity to the nearest edge
