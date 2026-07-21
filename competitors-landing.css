@@ -36,6 +36,12 @@
     0.86 36%, 0.96 42%, 1.03 48%, 1.06 54%, 1.06 60%, 1.04 68%,
     1.01 78%, 1 88%, 1
   );
+  /* The same idea wound tighter: overshoots to ~1.16, dips under, comes back.
+     Two visible bounces instead of the elastic curve's single settle. */
+  --ease-bounce: linear(
+    0, 0.28 8%, 0.62 16%, 0.89 24%, 1.08 32%, 1.16 40%, 1.14 48%,
+    1.06 56%, 0.98 64%, 0.96 70%, 0.99 78%, 1.02 86%, 1.01 92%, 1
+  );
 
   --utility-h: 35px;
   --header-h: 66px;
@@ -524,7 +530,11 @@ html { scroll-snap-type: y proximity; }
     transform: translateX(-48px);
     /* The elastic curve overshoots to ~1.06, so the card drifts a touch past its
        resting place and settles back rather than stopping dead. */
-    transition: transform 900ms var(--ease-elastic), opacity 420ms ease-out;
+    /* One transition drives both the reveal and the hover lift: an element only
+       gets one, and the hover block used to redefine it and silently retime the
+       reveal. 600ms is long enough for the bounce to read on a 48px slide and
+       still feel immediate on a 10px lift. */
+    transition: transform 600ms var(--ease-bounce), opacity 300ms var(--ease-mech);
     will-change: transform;
   }
   .compare-card:nth-child(even) { transform: translateX(48px); }
@@ -536,7 +546,6 @@ html { scroll-snap-type: y proximity; }
    the set rather than every card reacting on its own. Gated on a real pointer:
    on touch :hover sticks after a tap and the grid would stay dimmed. */
 @media (hover: hover) and (pointer: fine) {
-  .compare-card { transition: transform 260ms var(--ease-mech), opacity 260ms var(--ease-mech); }
   .compare-grid:hover .compare-card { opacity: 0.45; }
   .compare-grid .compare-card:hover { opacity: 1; }
   .compare-grid .compare-card:hover .card-panel {
@@ -547,7 +556,7 @@ html { scroll-snap-type: y proximity; }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   /* The reveal leaves the card on `transform: none`, so this has to outrank it. */
-  .compare-grid .compare-card:hover { transform: translateY(-8px); }
+  .compare-grid .compare-card:hover { transform: translateY(-10px); }
 }
 
 /* ============ LEGAL MODALS ============
