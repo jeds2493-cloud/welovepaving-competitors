@@ -909,7 +909,13 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .h-track {
     position: static; display: block; overflow: visible; scroll-snap-type: none; height: auto;
   }
-  .panel { flex: none; width: auto; height: auto; min-height: 92vh; overflow: visible; }
+  /* The chrome is fixed, so a plain scrollIntoView parks the panel's top under
+     it and the heading lands behind the header. The margin makes the scroll stop
+     at the chrome's edge instead. */
+  .panel {
+    flex: none; width: auto; height: auto; min-height: 92vh; overflow: visible;
+    scroll-margin-top: calc(var(--utility-h) + var(--header-h));
+  }
 
   /* The scene is one shared backdrop here, but the scrims are per panel, so P1
      ended near black and P2 restarted bright: a hard seam at the handoff. P1
