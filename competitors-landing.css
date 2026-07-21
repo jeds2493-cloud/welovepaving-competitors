@@ -1,7 +1,8 @@
 /* ============================================================
-   WLP — Competitor Comparison landing (horizontal scroll)
-   Self-contained. Shares the WLP design tokens with the other
-   landings but uses a horizontal panel layout (V2 mockup).
+   WLP — Competitor Comparison landing
+   Self-contained, no build step. Shares the WLP design tokens with the other
+   landings. One vertical page: the hero carries the scene art and every section
+   below it stacks normally.
    ============================================================ */
 
 /* ============ TOKENS ============ */
@@ -53,19 +54,11 @@ body {
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  /* The page scrolls vertically. The hero zone is one viewport tall and holds the
-     horizontal-scroll track (hero + comparison + quality); the FAQ/form and footer
-     flow vertically below it. */
-  overflow-x: hidden;
+  /* clip, not hidden: hidden computes overflow-y to auto and makes body its own
+     scroll container, which throws scrollIntoView off by the scroll-margin. */
+  overflow-x: clip;
 }
-/* Hero zone: chrome on top, the horizontal track fills the rest of the viewport. */
-.hero-zone { height: 100dvh; display: flex; flex-direction: column; }
-/* While moving through the first three (horizontal) sections the page cannot scroll
-   vertically at all — only the track moves sideways. The class goes on <html> (the
-   scrolling root); JS drops it once the last panel is reached so the FAQ/form/footer
-   below become scrollable. */
-html.h-locked { overflow: hidden; height: 100%; }
-html.h-locked body { overflow: hidden; }
+
 img { max-width: 100%; display: block; }
 h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02em; }
 p { margin: 0; }
@@ -175,59 +168,46 @@ body.past-hero .header-cta {
 }
 .header-phone:hover .header-phone-num { color: var(--yellow); }
 
-/* ============ STAGE + SHARED SCENE ============
-   The stage fills everything under the header. One scene image lives behind the
-   whole panel track and pans left as you scroll, so the panda travels from the
-   right (hero) toward the left (later panels) over a single continuous backdrop
-   — no per-section image, no seam. */
-.stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+/* ============ STAGE + HERO SCENE ============
+   The page is one vertical scroll: the stage is a plain block and the sections
+   stack inside it. The scene art belongs to the hero only — below it the
+   sections carry their own opaque backgrounds. */
+.stage { position: relative; }
 
-.scene-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #0E0C0A; }
+.scene-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #010000; }
 .scene-bg img {
   position: absolute; top: 0; left: 0;
-  width: 150%; height: 100%; max-width: none;
-  object-fit: cover; object-position: 50% 100%;
-  /* --scene-x = scroll-driven pan; --px/--py = light pointer drift. scale hides
-     the drift's edges and keeps coverage at the pan extremes. */
-  transform: translate3d(calc(var(--scene-x, 0px) + var(--px, 0px)), var(--py, 0px), 0) scale(1.06);
-  transform-origin: center bottom;
+  width: 100%; max-width: none;
+  object-fit: cover;
+  /* --scene-y = scroll drift; --px/--py = light pointer drift. */
+  transform: translate3d(var(--px, 0px), calc(var(--py, 0px) + var(--scene-y, 0px)), 0) scale(1.02);
+  transform-origin: 50% 0%;
   will-change: transform;
 }
 
-/* ============ HORIZONTAL PANEL TRACK (over the scene) ============ */
-.h-track {
-  position: absolute; inset: 0; z-index: 1;
-  display: flex;
-  overflow-x: auto; overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  scrollbar-width: none;            /* Firefox — hide the scrollbar */
-  -ms-overflow-style: none;         /* old Edge */
-}
-.h-track::-webkit-scrollbar { width: 0; height: 0; display: none; }  /* Chrome / Safari */
+/* ============ SECTIONS ============ */
+.h-track { position: relative; z-index: 1; }
 .panel {
-  flex: 0 0 100%;
-  height: 100%;
-  scroll-snap-align: start;
   position: relative;
-  overflow-y: auto;
   background: transparent;
-  scrollbar-width: none; -ms-overflow-style: none;
+  /* The chrome is fixed, so a plain scrollIntoView parks a section's top under
+     it and the heading lands behind the header. */
+  scroll-margin-top: calc(var(--utility-h) + var(--header-h));
 }
-.panel::-webkit-scrollbar { width: 0; height: 0; display: none; }
-/* Per-panel legibility scrim, weighted toward whichever side holds the copy.
-   It scrolls in with its panel so the darkening tracks the content, not the scene. */
+/* Legibility scrim over the hero art. */
 .panel-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+/* The art fades to black at its own bottom, so the scrim only has to take over
+   from there and hold the copy. */
 .scrim--left {
-  background:
-    radial-gradient(90% 120% at 74% 55%, rgba(14,12,10,0) 0%, rgba(14,12,10,0.28) 62%, rgba(14,12,10,0.6) 100%),
-    linear-gradient(270deg, rgba(14,12,10,0.04) 0%, rgba(14,12,10,0.10) 34%, rgba(14,12,10,0.50) 50%, rgba(14,12,10,0.93) 62%, rgba(14,12,10,0.98) 78%);
+  background: linear-gradient(180deg,
+    rgba(14,12,10,0) 0%,
+    rgba(14,12,10,0.10) 34%,
+    rgba(14,12,10,0.55) 52%,
+    rgba(14,12,10,0.88) 66%,
+    rgba(14,12,10,0.94) 100%);
 }
-.scrim--right {
-  background:
-    radial-gradient(90% 120% at 26% 55%, rgba(14,12,10,0) 0%, rgba(14,12,10,0.30) 62%, rgba(14,12,10,0.62) 100%),
-    linear-gradient(90deg, rgba(14,12,10,0.02) 0%, rgba(14,12,10,0.10) 30%, rgba(14,12,10,0.55) 48%, rgba(14,12,10,0.90) 62%, rgba(14,12,10,0.98) 80%);
-}
+/* P2 carries its own solid background now; nothing shows through. */
+.scrim--right { display: none; }
 
 /* ============ P1 · HERO ============ */
 /* The copy drifts a touch opposite the cursor for a subtle layered feel with the
@@ -241,7 +221,7 @@ body.past-hero .header-cta {
 }
 .hero-inner {
   position: relative; z-index: 4;
-  max-width: 1440px; margin: 0 auto; height: 100%;
+  max-width: 1440px; margin: 0 auto;
   display: flex; align-items: center; justify-content: flex-start;
   padding: 0 clamp(24px, 5vw, 64px);
 }
@@ -298,7 +278,7 @@ body.past-hero .header-cta {
    the scrim-darkened side of the scene. */
 .compare-inner {
   position: relative; z-index: 4;
-  max-width: 1440px; margin: 0 auto; height: 100%;
+  max-width: 1440px; margin: 0 auto;
   display: flex; align-items: center; justify-content: flex-end;
   padding: clamp(24px, 4vh, 48px) clamp(24px, 5vw, 64px);
 }
@@ -396,12 +376,12 @@ body.past-hero .header-cta {
 }
 @media (prefers-reduced-motion: reduce) { .scroll-next__arrow { animation: none; } }
 
-/* ============ P3 · THE QUALITY OF OUR WORK (horizontal panel) ============
+/* ============ P3 · THE QUALITY OF OUR WORK ============
    The asphalt background is top-aligned at the SAME 100%-width scale as the
    post-hero background below it; JS offsets the post-hero crop by the panel height
    (--posthero-bg-y) so the two are one continuous image across the handoff. */
 .panel--pledge { background: #0E0C0A; overflow: hidden; }
-/* Last horizontal panel: the cue sits centred at the very bottom and points down,
+/* The cue sits centred at the very bottom of the section and points down,
    because from here the page hands off to the vertical section. */
 @media (min-width: 901px) {
   .panel--pledge .scroll-next {
@@ -440,11 +420,10 @@ body.past-hero .header-cta {
 }
 .pledge-inner {
   position: relative; z-index: 4;
-  max-width: 1440px; margin: 0 auto; height: 100%;
+  max-width: 1440px; margin: 0 auto;
   display: flex; flex-direction: column; justify-content: center;
   gap: clamp(16px, 2.4vh, 26px);
   padding: clamp(24px, 4vh, 48px) clamp(24px, 5vw, 64px);
-  overflow-y: auto;
 }
 .pledge-head h2 {
   font-size: clamp(24px, 2.9vw, 42px); line-height: 1.02; font-weight: 900;
@@ -465,8 +444,8 @@ body.past-hero .header-cta {
 
 /* Service cards. Same component as the striping and concrete landings (cond-*),
    kept class-for-class so the three landings share one piece. Differences here
-   are the panel context only: this one lives in a fixed-height horizontal panel,
-   so the media band is shorter and the card never opens a lightbox. */
+   are the section context only: the media band is shorter here and the card
+   never opens a lightbox. */
 .cond-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(11px, 1vw, 16px); }
 .cond-card {
   background: var(--bg-dark-2); border: 1px solid var(--border-dark);
@@ -517,12 +496,10 @@ body.past-hero .header-cta {
 }
 .pledge-card p { font-size: 13px; line-height: 1.42; color: #C8C5BD; }
 
-/* ============ P2 CARD REVEAL (stacked layouts only) ============
+/* ============ P2 CARD REVEAL ============
    The cards slide in alternately from either side as they reach the viewport.
-   Scoped under 901px on purpose: above it the same cards are the CardSwap stack,
-   whose transform is driven by --slot-t, and a reveal transform would fight it.
-   Gated on no-preference, so with reduced motion the cards are simply there. */
-@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+   Gated on no-preference, so with reduced motion they are simply there. */
+@media (prefers-reduced-motion: no-preference) {
   .compare-card {
     opacity: 0;
     transform: translateX(-48px);
@@ -586,8 +563,8 @@ body.past-hero .header-cta {
    that rect to the panel's resting rect. The panel itself is a plain centred
    dialog, so if the animation never runs (reduced motion, no Web Animations) the
    modal still opens correctly. */
-/* The page scrolls on <html>, not body (see .h-locked), so the modal's scroll
-   lock goes on the same element. */
+/* The page scrolls on <html>, not body, so the modal's scroll lock goes on the
+   same element. */
 html.svc-open, html.svc-open body { overflow: hidden; }
 .svc-modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; }
 .svc-modal[hidden] { display: none; }
@@ -776,7 +753,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 .post-hero { position: relative; background: #0E0C0A; isolation: isolate; }
 /* One continuous image with P3: same full-width scale, but the crop starts where
    P3 left off (--posthero-bg-y = -panelHeight, set by JS) so the asphalt flows on
-   unbroken from the horizontal panel into this vertical zone, fading to black. */
+   unbroken from P3 into this zone, fading to black. */
 .post-hero::before {
   content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
   background: url("images/pledge-bg.webp") center var(--posthero-bg-y, 0px) / 100% auto no-repeat;
@@ -865,25 +842,12 @@ html.svc-open, html.svc-open body { overflow: hidden; }
    The stage stops being a fixed viewport; panels stack normally. The scene
    becomes a fixed backdrop the stacked content scrolls over (still one shared
    background), with a stronger bottom-up scrim on each panel for legibility. */
-@media (max-width: 900px), (prefers-reduced-motion: reduce) {
-  body { overflow-x: hidden; }
-  .hero-zone { height: auto; display: block; }
-  .stage { position: relative; flex: none; height: auto; overflow: visible; }
-  .faq-form-grid { grid-template-columns: 1fr; }
-  .footer-license { text-align: left; }
-  /* Scrolls with the page instead of being pinned to the viewport. Fixed, the art
-     stayed put while the copy climbed, so the headline rode over the characters
-     within ~125px of scroll no matter how the image was framed. In flow, the
-     spacing the layout gives them holds all the way down. */
-  .scene-bg { position: absolute; inset: 0; }
-  /* The mobile art puts the whole scene in its top half and fades to black below,
-     so it is the layout: the art reads clean up top and the copy sits in the
-     black, with no box or overlay of its own. Anchored to the top so the panda
-     never slides under the chrome. */
-  /* Chrome pinned to the top for the whole page. It is fixed rather than sticky
-     because both bars live inside .hero-zone, and a sticky element stops sticking
-     once its own container scrolls past: the header would have vanished at the
-     FAQ. The zone reserves their height so nothing starts underneath them. */
+/* ============ PHONE REFINEMENTS ============ */
+@media (max-width: 900px) {
+  /* Chrome pinned to the top for the whole page. Fixed rather than sticky because
+     both bars live inside .hero-zone, and a sticky element stops sticking once
+     its own container scrolls past: the header would have vanished at the FAQ.
+     The zone reserves their height so nothing starts underneath them. */
   .utility-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 51; }
   /* Fully opaque now that content scrolls under it: at 0.96 the headline ghosted
      through the bar. */
@@ -892,115 +856,91 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     background: #14120E;
   }
   .hero-zone { padding-top: calc(var(--utility-h) + var(--header-h)); }
+  .faq-form-grid { grid-template-columns: 1fr; }
+  .footer-license { text-align: left; }
 
-  /* The layer starts below the chrome rather than behind it: the art is composed
-     with the panda's hard hat near its top edge, and a full-viewport layer put
-     that hat under the header. Once the chrome scrolls away the strip it leaves
-     is covered by the layer's own dark fill and, by then, P2's flat scrim. */
-  /* Sampled from the art's own bottom edge (#010000), so where the image ends the
-     layer carries on with no band. */
-  .scene-bg { background: #010000; }
   /* The art gets a fixed share of the screen rather than whatever its own aspect
-     ratio works out to. Sized to the width it was 505px tall, which fits a 844px
-     viewport but not the ~620px Chrome leaves once its toolbars are up: the copy
-     then started halfway up the characters. At 42svh the scene always ends above
-     the copy, on any phone, and the crop lands where the art has already gone
-     black so the layer's fill continues it with no seam. */
+     ratio works out to, so the scene always ends above the copy on any phone.
+     svh, not dvh: dvh tracks the browser toolbars, so every time Chrome hid or
+     showed its bottom bar the hero resized and the whole page jumped. */
   .scene-bg img {
-    /* svh, not dvh: dvh tracks the browser toolbars, so every time Chrome hid or
-       showed its bottom bar the hero resized and the whole page jumped. svh is
-       the viewport with the toolbars up — it never changes, so the layout holds
-       still and the extra height the collapse frees just shows more of the page. */
-    width: 100%; height: 42svh;
-    object-fit: cover; object-position: 50% 0%;
+    height: 42svh;
+    object-position: 50% 0%;
     /* The crop lands on dark asphalt, not pure black, so the cut showed as a line
        against the layer's fill. Fading the last quarter of the image out lets the
-       fill come through instead of meeting it edge to edge. The mask is in the
-       element's own box, so it travels with the lift and the parallax. */
+       fill come through instead of meeting it edge to edge. */
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 74%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 0%, #000 74%, transparent 100%);
-    transform-origin: 50% 0%;
-    /* The lift is of the art's own height, so it holds at any viewport. This art
-       carries little sky above the hard hat, so it does not have much room
-       before the lift starts cutting it. */
+    /* Of the art's own height, so the lift holds at any viewport. This art
+       carries little sky above the hard hat, so there is not much room before
+       the lift starts cutting it. */
     transform: translate3d(
       var(--px, 0px),
       calc(var(--py, 0px) + var(--scene-y, 0px)),
       0) translateY(-8%) scale(1.02);
   }
-  .h-track {
-    position: static; display: block; overflow: visible; scroll-snap-type: none; height: auto;
-  }
-  /* The chrome is fixed, so a plain scrollIntoView parks the panel's top under
-     it and the heading lands behind the header. The margin makes the scroll stop
-     at the chrome's edge instead. */
-  .panel {
-    flex: none; width: auto; height: auto; min-height: 92svh; overflow: visible;
-    scroll-margin-top: calc(var(--utility-h) + var(--header-h));
-  }
 
-  /* The scene is one shared backdrop here, but the scrims are per panel, so P1
-     ended near black and P2 restarted bright: a hard seam at the handoff. P1
-     keeps the bottom-up ramp for the hero copy and P2 continues flat at the value
-     P1 ends on, so the darkening reads as one gradient across both. */
-  /* Barely there over the art's own top half, then it takes over from the black
-     the image fades into, so P1 ends solid and P2 continues at the same value. */
-  .panel-scrim.scrim--left {
-    background: linear-gradient(180deg,
-      rgba(14,12,10,0) 0%,
-      rgba(14,12,10,0.10) 34%,
-      rgba(14,12,10,0.55) 52%,
-      rgba(14,12,10,0.88) 66%,
-      rgba(14,12,10,0.94) 100%);
-  }
-  .panel-scrim.scrim--right { background: rgba(14,12,10,0.94); }
-
-  /* The copy sits over the brightest part of the art (sky and the panda's white
-     face), so the scrim alone was carrying it. A tight shadow holds the edges
-     without the copy reading as embossed. */
+  /* The copy sits over the brightest part of the art, so the scrim alone was
+     carrying it. A tight shadow holds the edges without it reading as embossed. */
   .hero-content .eyebrow,
   .hero-content h1,
   .hero-content .lede,
   .hero-bullets li { text-shadow: 0 1px 3px rgba(8,7,5,0.55); }
   .hero-content .lede { color: #E4E1DA; }
-  /* The art owns the top of the screen and the copy sits in its black lower half,
-     so the block is bottom-anchored. The bottom padding clears the scroll cue and
-     the sticky call bar under it. */
-  /* The hero ends where the sticky call bar begins, so the art, the copy and the
-     cue share exactly one screen and nothing is hidden behind the bar. */
+
+  /* The art owns the top of the screen and the copy sits in the black it fades
+     into, so the block is bottom-anchored and the hero is exactly one screen. */
   .hero-inner {
     justify-content: flex-start; align-items: flex-end;
-    /* The call bar only shows up past the hero now, so the first screen is the
-       hero's alone: the cue sits just clear of the bottom edge and the copy
-       follows it down. */
     padding-top: 24px; padding-bottom: calc(26px + env(safe-area-inset-bottom));
     min-height: calc(100svh - var(--utility-h) - var(--header-h));
   }
-
-  /* P2 content simply centres over the backdrop and stacks its cards. */
-  /* The hero is exactly one screen tall here, so its panel does not also need the
-     generic 92vh floor: that floor was adding a strip of nothing under the scroll
-     cue before P2 even started. */
   .panel--hero { min-height: 0; }
-  .compare-inner {
-    justify-content: center; align-items: center; min-height: 92svh;
-    padding: 32px clamp(20px, 6vw, 40px) 56px;
-  }
+
+  .compare-inner { padding: 32px clamp(20px, 6vw, 40px) 56px; }
   .compare-content { max-width: 640px; }
   .scroll-next { align-self: center; }
-
-  /* P3 stacks: before/after above the pillars/questions, all full width. */
-  .pledge-inner { justify-content: flex-start; min-height: 92svh; padding: 56px clamp(20px, 6vw, 40px); }
+  .pledge-inner { padding: 56px clamp(20px, 6vw, 40px); }
   .cond-grid { grid-template-columns: 1fr 1fr; }
   .pledge-grid { grid-template-columns: 1fr 1fr; }
-  /* No horizontal lock on mobile — everything is a normal vertical stack. */
-  html.h-locked, html.h-locked body { overflow: visible; height: auto; }
   .compare-grid { grid-template-columns: repeat(2, 1fr); }
 }
-/* In-between widths (horizontal still on but the content area is narrower). */
+/* ============ DESKTOP ============ */
+@media (min-width: 901px) {
+  /* The art is the hero's, not the page's: one screen tall, anchored to its
+     bottom so the toppled competitors sit on the fold line. */
+  /* The ultrawide art is 3.06:1 against a hero that is closer to 2:1, so it is
+     laid out at 150% and anchored to its bottom edge: that lands the panda on
+     the right of the copy and keeps the toppled competitors on the fold, which
+     is the framing the art is composed for. */
+  .scene-bg img {
+    width: 150%;
+    height: calc(100svh - var(--utility-h) - var(--header-h));
+    object-position: 50% 100%;
+    /* Grown from the bottom edge, not the top: with a top origin the scale
+       pushed the toppled competitors out of the frame. */
+    transform-origin: 50% 100%;
+  }
+  .hero-inner {
+    align-items: flex-end;
+    min-height: calc(100svh - var(--utility-h) - var(--header-h));
+    padding-bottom: clamp(56px, 9vh, 96px);
+  }
+
+  /* P2 stops being a transparent panel over the scene and becomes its own dark
+     section, so the six cards read as a set instead of floating on the art. */
+  .panel--compare { background: var(--bg-dark); }
+  .compare-inner { display: block; padding: clamp(56px, 9vh, 96px) clamp(24px, 5vw, 64px); }
+  .compare-content { max-width: none; }
+  .compare-head { max-width: 780px; margin-bottom: clamp(28px, 4vh, 44px); }
+  /* All six advantages on screen at once: three across, two deep. */
+  .compare-grid { grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.4vw, 22px); }
+  .compare-card { height: 100%; }
+  .card-panel { display: flex; flex-direction: column; }
+  .card-a { margin-top: auto; }
+}
 @media (min-width: 901px) and (max-width: 1180px) {
   .compare-grid { grid-template-columns: repeat(2, 1fr); }
-  .compare-content { max-width: 560px; }
 }
 @media (max-width: 520px) {
   .compare-grid { grid-template-columns: 1fr; }
@@ -1122,103 +1062,4 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     opacity: 1; pointer-events: auto; transform: none;
     font-size: 12px; white-space: nowrap;
   }
-}
-
-/* ============================================================
-   P2 · CARD SWAP (desktop only)
-   Vanilla port of the React Bits <CardSwap>. The six cards become a skewed 3D
-   stack pinned into the bottom-right corner, overflowing both edges the way the
-   reference does. Progressive enhancement: these rules only bite once JS adds the
-   classes, so without JS, on mobile, or under reduced motion the cards stay the
-   plain readable grid.
-   ============================================================ */
-@media (min-width: 901px) {
-  /* The stack overhangs the panel on purpose. Clip it, or the panel turns into a
-     nested scroller that fights the track's snap navigation. */
-  .panel--compare.has-swap { overflow: hidden; }
-
-  /* Copy stays in its original right-hand column, clear of the panda. It moves to
-     the top so the stack owns the lower right instead of colliding with it. */
-  .panel--compare.has-swap .compare-inner { align-items: flex-start; }
-  .compare-content.has-swap {
-    max-width: 520px;
-    padding-top: clamp(24px, 6vh, 70px);
-  }
-
-  /* Anchored to the bottom-right and pushed past it, mirroring the original's
-     translate(5%, 20%) off its bottom-right origin. */
-  .compare-grid.card-swap {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    display: block;
-    width: clamp(490px, 40vw, 640px);
-    height: clamp(390px, 54vh, 540px);
-    perspective: 1200px;
-    transform: translate(11%, 36%);
-    transform-origin: bottom right;
-    overflow: visible;
-  }
-  .compare-grid.card-swap .compare-card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    /* JS writes the slot as custom properties and the transform is applied here,
-       inside the breakpoint, so the media query stays authoritative: below 901px
-       the cards simply render flat, whatever the script left behind. */
-    transform: var(--slot-t, none);
-    z-index: var(--slot-z, auto);
-    /* The card is cropped by the panel edge on purpose, but ours carry real copy,
-       not the reference's empty placeholders. Keep the text out of the cropped
-       band so nothing meaningful is cut off. */
-    will-change: transform;
-    backface-visibility: hidden;
-    transition: transform 1500ms var(--ease-elastic);
-    filter: drop-shadow(0 26px 45px rgba(0,0,0,0.55));
-  }
-  .compare-grid.card-swap .card-panel {
-    /* The card is cropped by the panel edge on purpose, but ours carry real copy,
-       not the reference's empty placeholders. Keep the text out of the cropped
-       band so nothing meaningful is cut off. */
-    padding: clamp(24px, 2.2vw, 34px);
-    /* Pushed further into the corner, so the copy needs a wider guard band to
-       stay out of the cropped edge. */
-    padding-right: clamp(120px, 24%, 190px);
-    border-radius: 0 16px 16px 16px;
-  }
-
-  /* The stack cards are ~500px wide, so the grid's type scale reads tiny on them. */
-  .compare-grid.card-swap .card-tab {
-    font-size: clamp(14px, 1.15vw, 18px); gap: 10px;
-    padding: 13px 20px 11px; border-radius: 16px 16px 0 0;
-  }
-  /* The tab is the only part of a back card you can reach, so it is the click
-     target that promotes it — clicking is the instinct, and without it people
-     rage-click a stack that only answers to the wheel. */
-  /* The card box is wider than its tab, so its empty top-right corner would sit
-     on top of the tabs behind it and swallow their clicks. Only the painted parts
-     take the pointer. */
-  .compare-grid.card-swap .compare-card { pointer-events: none; }
-  .compare-grid.card-swap .card-tab,
-  .compare-grid.card-swap .card-panel { pointer-events: auto; }
-  .compare-grid.card-swap .card-tab { cursor: pointer; }
-  .compare-grid.card-swap .compare-card.is-front .card-tab { cursor: default; }
-  /* Hovering a back card lifts it out of the stack so the target is obvious. The
-     lift is prepended, so it happens in the grid's space, before the slot skew. */
-  .compare-grid.card-swap .compare-card:not(.is-front):hover {
-    transform: translateY(-16px) var(--slot-t);
-    transition: transform 300ms var(--ease-mech);
-  }
-  .compare-grid.card-swap .card-tab .icon { width: 20px; height: 20px; }
-  .compare-grid.card-swap .card-q {
-    font-size: clamp(16px, 1.25vw, 20px); line-height: 1.45;
-  }
-  .compare-grid.card-swap .card-a {
-    font-size: clamp(14px, 1.05vw, 17px); line-height: 1.45;
-    margin-top: clamp(14px, 1.8vh, 22px); padding-top: clamp(12px, 1.6vh, 18px);
-  }
-  .compare-grid.card-swap .card-a .icon { width: 19px; height: 19px; margin-top: 2px; }
 }

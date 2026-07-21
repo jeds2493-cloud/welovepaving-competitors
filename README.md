@@ -13,19 +13,12 @@ reconstructed with GeneratePress or GenerateBlocks.
 It lives in its own repo, separate from the main site, so it can be published and
 updated without touching anything else.
 
-## What makes this one different
-
-Desktop is a **horizontal** landing. The first three sections sit on one
-viewport-tall track that scrolls sideways, over a single background image that
-pans with it, and vertical scrolling is locked until the last panel hands off to
-the rest of the page. Mobile drops all of that and stacks normally.
-
 ## Structure
 
 ```
 index.html                 the landing
 competitors-landing.css    self-contained styles, no build step
-competitors-landing.js     horizontal track, card swap, modals, tracking
+competitors-landing.js     reveals, modals, parallax, tracking
 legal/                     flattened copies of the 3 legal pages, opened in modals
 images/                    only the assets this page references
 tools/                     build-time only (excluded from deploy via .vercelignore)
@@ -51,23 +44,29 @@ to a welovepaving domain.
 
 | # | Section | Notes |
 |---|---------|-------|
-| P1 | Hero | horizontal panel 1; mobile gets its own portrait art and a scroll cue |
-| P2 | What to compare | six folder-tab cards; desktop turns them into a 3D swap stack |
+| P1 | Hero | one screen tall; mobile gets its own portrait art and a scroll cue |
+| P2 | What to compare | the six advantages as folder-tab cards, all on screen at once |
 | P3 | The quality of our work | four self-performed services + four quality pillars |
-| — | FAQ + lead form | vertical from here down |
+| — | FAQ + lead form | |
 | — | Footer | legal links open in modals, nothing leaves the landing |
 
 ## Interaction notes
 
-- **Horizontal track** (≥901px): one panel per wheel gesture. Incrementing
-  `scrollLeft` fights `scroll-snap-type: x mandatory`, so navigation is a snap to
-  a panel index with a short lock, not a continuous scroll.
-- **Scroll lock**: the page scrolls on `<html>`, not `<body>`, so the lock class
-  goes on `document.documentElement`.
-- **Card swap** (P2, desktop, motion-safe): a vanilla port of React Bits'
-  `<CardSwap>`. JS only writes `--slot-t` / `--slot-z`; the CSS applies the
-  transform *inside* the media query, so the breakpoint stays authoritative and
-  no cleanup is needed below it. Wheel and tab clicks both drive it.
+- **Card reveal** (P2): the six cards slide in from alternating sides as they
+  reach the viewport, on the shared elastic curve. The observer disconnects on
+  the first hit — it is an entrance, not a toggle — and the whole thing is gated
+  on `prefers-reduced-motion: no-preference`.
+- **Fixed chrome** (≤900px): the utility bar and header are `position: fixed`,
+  not sticky, because both live inside `.hero-zone` and a sticky element stops
+  sticking once its own container scrolls past. The sections carry a
+  `scroll-margin-top` of the chrome's height so `scrollIntoView` stops at its
+  edge rather than under it.
+- **`overflow-x: clip`, not `hidden`**, on `body`: `hidden` computes `overflow-y`
+  to `auto` and makes body its own scroll container, which throws
+  `scrollIntoView` off by exactly the scroll-margin.
+- **Viewport units**: `svh`, not `dvh`. `dvh` tracks the mobile browser toolbars,
+  so every time Chrome hid or showed its bottom bar the layout resized and the
+  page jumped.
 - **Request modal**: every CTA opens the same modal, which morphs out of the
   element that was pressed (FLIP). The page has exactly one lead form, so it is
   moved into the modal and put back on close rather than duplicated — a second

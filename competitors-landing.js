@@ -1,67 +1,13 @@
 /* ============================================================
    WLP — Competitor Comparison landing
-   Horizontal panel navigation: vertical wheel is translated to sideways
-   scroll and arrow keys move between panels. On mobile or under
-   reduced motion the layout degrades to a normal vertical page and this stays
-   inert.
+   One vertical page: the hero carries the scene art and everything below it is
+   a normal stacked section.
    ============================================================ */
 
 window.dataLayer = window.dataLayer || [];
 const track = (event, params = {}) => window.dataLayer.push({ event, ...params });
 
-const hTrack = document.querySelector('[data-h-track]');
-const horizontalMQ = window.matchMedia('(min-width: 901px)');
 const reducedMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
-const isHorizontal = () => horizontalMQ.matches && !reducedMQ.matches;
-
-const panels = () => [...hTrack.querySelectorAll('.panel')];
-const panelIndex = () => Math.round(hTrack.scrollLeft / hTrack.clientWidth);
-
-function goToPanel(i) {
-  const max = panels().length - 1;
-  const clamped = Math.min(Math.max(i, 0), max);
-  hTrack.scrollTo({ left: clamped * hTrack.clientWidth, behavior: reducedMQ.matches ? 'auto' : 'smooth' });
-}
-
-/* ---------- Wheel -> advance one panel ----------
-   Incremental scrollLeft fights `scroll-snap-type: x mandatory` (small deltas snap
-   straight back), so a wheel gesture instead steps to the next/previous panel. A
-   short lock keeps a single trackpad flick from skipping several panels. */
-if (hTrack) {
-  let wheelLock = false;
-  hTrack.addEventListener('wheel', (e) => {
-    if (!isHorizontal()) return;
-    // Only capture while the hero zone fills the viewport (page scrolled to top).
-    if (window.scrollY > 1) return;
-    const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (Math.abs(delta) < 4) return;
-    const i = panelIndex();
-    const last = panels().length - 1;
-    // At the last panel pushing forward: unlock and drop into the vertical FAQ.
-    if (delta > 0 && i >= last) {
-      e.preventDefault();
-      document.documentElement.classList.remove('h-locked');
-      if (postHero) postHero.scrollIntoView({ behavior: reducedMQ.matches ? 'auto' : 'smooth' });
-      return;
-    }
-    if (delta < 0 && i <= 0) return;   // nothing before the first panel
-    e.preventDefault();
-    if (wheelLock) return;
-    wheelLock = true;
-    goToPanel(i + (delta > 0 ? 1 : -1));
-    setTimeout(() => { wheelLock = false; }, 620);
-  }, { passive: false });
-}
-
-/* ---------- Keyboard arrows ---------- */
-document.addEventListener('keydown', (e) => {
-  if (!isHorizontal()) return;
-  if (window.scrollY > 1) return;   // only while the hero zone is in view
-  const tag = (e.target.tagName || '').toLowerCase();
-  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-  if (e.key === 'ArrowRight' || e.key === 'PageDown') { goToPanel(panelIndex() + 1); e.preventDefault(); }
-  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { goToPanel(panelIndex() - 1); e.preventDefault(); }
-});
 
 /* ---------- Utility-bar marquee (mobile) ----------
    The four badges do not fit one phone-width row, so on mobile the bar scrolls
@@ -108,144 +54,41 @@ if (headerEl || utilityEl) {
   });
 }
 
-/* ---------- Shared scene pan ----------
-   One background image spans the whole track. As the track scrolls right, the
-   scene pans left (by its horizontal slack) so the panda travels from the right
-   of the hero toward the left on later panels — a single seamless backdrop. */
-const stage = document.querySelector('.stage');
-const sceneImg = document.querySelector('[data-scene] img');
-const postHero = document.querySelector('.post-hero');
-
-/* ---------- Vertical scroll lock over the three horizontal sections ----------
-   While the horizontal region is on screen the body is locked (no vertical scroll)
-   so only the track moves sideways. The lock drops when the reader pushes past the
-   last panel, and re-engages when they scroll back to the very top. */
-const lockV = (on) => document.documentElement.classList.toggle('h-locked', on);
-function refreshLock() {
-  if (!isHorizontal()) { lockV(false); return; }
-  if (window.scrollY <= 1) lockV(true);
-}
-/* Offset the post-hero backdrop by the panel height so its asphalt continues from
-   exactly where P3's leaves off — one unbroken image across the handoff. */
-function alignPostHeroBg() {
-  if (!postHero || !stage) return;
-  if (isHorizontal()) postHero.style.setProperty('--posthero-bg-y', (-Math.round(stage.clientHeight)) + 'px');
-  else postHero.style.removeProperty('--posthero-bg-y');
-}
-
-function updateScene() {
-  if (!sceneImg || !hTrack || !stage) return;
-  if (!isHorizontal()) { sceneImg.style.removeProperty('--scene-x'); return; }
-  const slack = sceneImg.offsetWidth - stage.clientWidth;      // pannable width (~50%)
-  // Complete the pan across the first panel width (hero -> comparison) and hold it
-  // there; later panels are opaque, so the scene stays put behind them.
-  const cw = hTrack.clientWidth;
-  const frac = cw > 0 ? Math.min(Math.max(hTrack.scrollLeft / cw, 0), 1) : 0;
-  sceneImg.style.setProperty('--scene-x', (-frac * slack).toFixed(1) + 'px');
-}
-
 /* ---------- Chrome state: reveal the header CTA past the hero ----------
    The header's "Request a Project Review" button is hidden on the hero and slides
-   in once the user reaches the second panel (horizontal) or scrolls the hero mostly
-   out of view (vertical). */
+   in once the hero is mostly out of view. */
 const heroPanel = document.querySelector('.panel--hero');
+const postHero = document.querySelector('.post-hero');
+const stage = document.querySelector('.stage');
+const pledgePanel = document.querySelector('.panel--pledge');
+
+/* ---------- Continue P3's asphalt into the section below ----------
+   Both use the same image at the same scale; offsetting the lower one by P3's
+   height makes the crop pick up exactly where P3's leaves off, so the backdrop
+   reads as one photo across the handoff. */
+function alignPostHeroBg() {
+  if (!postHero || !pledgePanel) return;
+  postHero.style.setProperty('--posthero-bg-y', (-Math.round(pledgePanel.offsetHeight)) + 'px');
+}
+alignPostHeroBg();
+new ResizeObserver(alignPostHeroBg).observe(pledgePanel || document.body);
 function updateChrome() {
-  let past = false;
-  if (isHorizontal()) {
-    past = hTrack.scrollLeft > hTrack.clientWidth * 0.5;
-  } else if (heroPanel) {
-    past = heroPanel.getBoundingClientRect().bottom < window.innerHeight * 0.5;
-  }
+  const past = !!heroPanel && heroPanel.getBoundingClientRect().bottom < window.innerHeight * 0.5;
   document.body.classList.toggle('past-hero', past);
 }
+window.addEventListener('scroll', updateChrome, { passive: true });
 
-if (hTrack) {
-  let raf = 0;
-  hTrack.addEventListener('scroll', () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => { updateScene(); updateChrome(); raf = 0; });
-  }, { passive: true });
-}
-window.addEventListener('scroll', () => {
-  updateChrome();                                        // vertical (mobile) mode
-  if (isHorizontal() && window.scrollY <= 1) lockV(true);  // re-lock at the top
-}, { passive: true });
-
-/* ---------- The handoff band is all-or-nothing ----------
-   The hero zone is one viewport tall and the vertical page starts right under it,
-   so anywhere between scrollY 0 and the zone's height you are looking at half of
-   each. Coming back up from the last section it was easy to stop right there and
-   see the bottom of P3 stacked on the top of the FAQ. This turns that band into a
-   gate: a gesture inside it commits to whichever side you were heading for. */
-const heroZone = document.querySelector('.hero-zone');
-if (heroZone && postHero) {
-  const bandTop = () => 1;
-  const bandBottom = () => heroZone.offsetHeight - 1;
-  let settling = false;
-
-  const settle = (toTop) => {
-    if (settling) return;
-    settling = true;
-    window.scrollTo({
-      top: toTop ? 0 : heroZone.offsetHeight,
-      behavior: reducedMQ.matches ? 'auto' : 'smooth',
-    });
-    // Landing at 0 re-locks the horizontal track through the scroll listener above.
-    setTimeout(() => { settling = false; }, 600);
-  };
-
-  // A modal owns the scroll while it is open; the band must not fight it.
-  const modalOpen = () =>
-    document.documentElement.classList.contains('svc-open') ||
-    !!document.querySelector('dialog[open]');
-
-  const inBand = () =>
-    isHorizontal() && !modalOpen() &&
-    window.scrollY > bandTop() && window.scrollY < bandBottom();
-
-  window.addEventListener('wheel', (e) => {
-    if (!inBand()) return;
-    const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (Math.abs(d) < 4) return;
-    e.preventDefault();
-    settle(d < 0);
-  }, { passive: false });
-
-  /* Touch and keyboard end up in the band too, and they never fire wheel. There
-     is no gesture direction to read once it is over, so this settles to whichever
-     side is closer. */
-  let idle = 0;
-  window.addEventListener('scroll', () => {
-    if (settling || !inBand()) return;
-    clearTimeout(idle);
-    idle = setTimeout(() => {
-      if (!inBand()) return;
-      settle(window.scrollY < heroZone.offsetHeight / 2);
-    }, 140);
-  }, { passive: true });
-}
-window.addEventListener('resize', () => { updateScene(); updateChrome(); alignPostHeroBg(); refreshLock(); });
-horizontalMQ.addEventListener('change', () => { updateScene(); updateChrome(); alignPostHeroBg(); refreshLock(); });
-updateScene();
-updateChrome();
-alignPostHeroBg();
-refreshLock();
-
-/* ---------- Scroll parallax on the stacked hero (mobile) ----------
-   The scene layer is fixed, so by default it does not move at all while the copy
-   scrolls over it: the two travel at 0 and 1, which reads as a static backdrop.
-   Drifting it up at a fraction of the scroll puts a real speed difference between
-   the art and the text. It is clamped to the hero's height so the image settles
-   instead of creeping through the rest of the page. */
+/* ---------- Scroll parallax on the hero art ----------
+   The art scrolls with the page; this drifts it up a little on top of that, so
+   there is a speed difference between it and the copy. Capped, because the art
+   sits above the copy: left unbounded the drift would close the gap the layout
+   leaves between the characters and the headline. */
 const SCENE_PARALLAX = 0.18;
-/* The art now scrolls with the page, so this is a nudge on top of that rather
-   than the whole movement: it only ever eats part of the gap the layout leaves
-   between the characters and the headline, never all of it. */
 const SCENE_MAX = 40;
+const sceneImg = document.querySelector('[data-scene] img');
 if (sceneImg && heroPanel) {
   let sceneRaf = 0;
   const paintSceneY = () => {
-    if (isHorizontal()) { sceneImg.style.removeProperty('--scene-y'); return; }
     const limit = heroPanel.offsetHeight;
     const y = Math.min(Math.max(window.scrollY, 0), limit);
     const drift = Math.min(y * SCENE_PARALLAX, SCENE_MAX);
@@ -255,13 +98,12 @@ if (sceneImg && heroPanel) {
     if (sceneRaf) return;
     sceneRaf = requestAnimationFrame(() => { sceneRaf = 0; paintSceneY(); });
   }, { passive: true });
-  horizontalMQ.addEventListener('change', paintSceneY);
   paintSceneY();
 }
 
 /* ---------- One-time view event per [data-view] panel ----------
    Fires the panel's analytics event the first time it's at least half in view
-   (works in both horizontal and vertical/stacked modes via the viewport root). */
+   the first time it is at least half in view. */
 document.querySelectorAll('[data-view]').forEach((el) => {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => {
@@ -298,22 +140,13 @@ document.querySelectorAll('.faq-q').forEach((btn) => {
 });
 
 /* ---------- "Keep scrolling" cue -> next panel, or out to the vertical page ----------
-   It now lives on the LAST horizontal panel, so the normal case is the handoff:
-   release the lock and drop into the post-hero section, same as the wheel does. */
+   Scrolls to whatever section follows the one it sits in. */
 document.querySelectorAll('[data-goto-next]').forEach((el) => {
   el.addEventListener('click', () => {
     const smooth = reducedMQ.matches ? 'auto' : 'smooth';
     const panel = el.closest('.panel');
-    if (!isHorizontal()) {
-      // Stacked: whatever is next in the flow, which for the hero cue is P2.
-      const next = panel?.nextElementSibling || postHero;
-      if (next) next.scrollIntoView({ behavior: smooth, block: 'start' });
-    } else if (panelIndex() < panels().length - 1) {
-      goToPanel(panelIndex() + 1);
-    } else {
-      document.documentElement.classList.remove('h-locked');
-      if (postHero) postHero.scrollIntoView({ behavior: smooth });
-    }
+    const next = panel?.nextElementSibling || postHero;
+    if (next) next.scrollIntoView({ behavior: smooth, block: 'start' });
     track('goto_next', { source: panel?.dataset.view || 'hero' });
   });
 });
@@ -594,11 +427,9 @@ if (svcModal) {
   });
 }
 
-/* ---------- P2 · card reveal (stacked layouts) ----------
-   Each card slides in from alternating sides as it reaches the viewport. The CSS
-   that does the sliding is scoped under 901px, where the cards are a plain grid;
-   above that they are the CardSwap stack and this class is inert, so there is
-   nothing to tear down when the breakpoint changes. */
+/* ---------- P2 · card reveal ----------
+   Each card slides in from alternating sides as it reaches the viewport. The
+   observer disconnects on the first hit: this is an entrance, not a toggle. */
 document.querySelectorAll('.compare-card').forEach((card) => {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => {
@@ -610,210 +441,3 @@ document.querySelectorAll('.compare-card').forEach((card) => {
   io.observe(card);
 });
 
-/* ---------- P2 · card swap (desktop, motion-safe) ----------
-   Vanilla port of the React Bits <CardSwap>: the front card drops out of the
-   stack, the ones behind promote a slot forward, and the dropped card slides back
-   in at the rear. Same slot maths as the original; the elastic feel comes from an
-   overshooting cubic-bezier instead of pulling in an animation library.
-
-   Progressive enhancement: the classes are only added once this runs, so without
-   JS, below 901px, or under reduced motion the six cards stay the plain grid. */
-const compareGrid = document.querySelector('.compare-grid');
-const compareContent = document.querySelector('.compare-content');
-const swapMQ = window.matchMedia('(min-width: 901px)');
-
-if (compareGrid && compareContent) {
-  const cards = [...compareGrid.querySelectorAll('.compare-card')];
-  const N = cards.length;
-  /* The reference fans three cards; we fan six, so the step has to be tighter or
-     the back of the stack climbs ~270px and collides with the copy above it. */
-  const DIST_X = 34;      // x offset per slot
-  const DIST_Y = 44;      // y offset per slot — one tab height, so every tab in the
-                          // stack stays fully visible and clickable
-  const SKEW = 6;         // deg, matches the reference
-  const DROP = 660;       // taller cards have to clear the frame before returning
-  const DELAY = 5200;     // slower cadence: let each card sit long enough to read
-  const DUR = 1500;       // must stay in sync with the CSS transition
-
-  const comparePanel = compareGrid.closest('.panel');
-
-  let order = cards.map((_, i) => i);
-  let timer = null;
-  let active = false;
-  /* Every move here is two-phase (something leaves, then the rest settle), so a
-     new move starting while an old one still has a deferred half pending would
-     place cards from a stale order. All the deferred halves go through here and
-     are dropped the moment another move begins. */
-  let pending = [];
-  const later = (fn, ms) => { pending.push(setTimeout(fn, ms)); };
-  const clearPending = () => { pending.forEach(clearTimeout); pending = []; };
-
-  const slot = (i) => ({ x: i * DIST_X, y: -i * DIST_Y, z: -i * DIST_X * 1.5, zi: N - i });
-  /* Write the slot into custom properties, never into `transform` directly. Inline
-     styles ignore media queries, so a directly-set transform would survive below
-     901px and leave the cards skewed in the mobile grid if a resize event ever
-     went missing. The CSS applies these only inside the desktop media query, so
-     the breakpoint is authoritative and no cleanup is required. */
-  const place = (el, s, dropY = 0) => {
-    el.style.setProperty('--slot-z', s.zi);
-    el.style.setProperty('--slot-t',
-      `translate(-50%, -50%) translate3d(${s.x}px, ${s.y + dropY}px, ${s.z}px) skewY(${SKEW}deg)`);
-  };
-
-  /* Only the front card is "read mode": the others get the hover lift and the
-     pointer cursor on their tab. */
-  const markFront = () => cards.forEach((c, i) => c.classList.toggle('is-front', i === order[0]));
-
-  const step = () => {
-    clearPending();
-    const [front, ...rest] = order;
-    place(cards[front], slot(0), DROP);          // front card drops away
-    later(() => {
-      rest.forEach((idx, i) => place(cards[idx], slot(i)));  // the rest promote
-      place(cards[front], slot(N - 1));                      // dropped one returns to the back
-      order = [...rest, front];
-      markFront();
-    }, DUR * 0.55);                                          // overlap, so it reads as one move
-  };
-
-  /* Reverse of step: the card at the back of the stack rises into the front slot
-     while the others demote one place. It is parked below the front slot without
-     a transition first, so it reads as coming up from underneath. */
-  const stepBack = () => {
-    if (order.length < 2) return;
-    clearPending();
-    const last = order[order.length - 1];
-    const rest = order.slice(0, -1);
-    const el = cards[last];
-    el.style.transition = 'none';
-    place(el, slot(0), DROP);
-    void el.offsetWidth;
-    el.style.transition = '';
-    rest.forEach((idx, i) => place(cards[idx], slot(i + 1)));
-    place(el, slot(0));
-    order = [last, ...rest];
-    markFront();
-  };
-
-  /* Clicking a tab promotes that card straight to the front. Everything behind it
-     keeps its relative order, so the stack reads as a rotation, not a reshuffle:
-     the cards you skipped past go to the back, exactly as if you had stepped
-     forward that many times. */
-  /* Clicking a tab plays the card out and back in, never a cut. It leaves
-     downward from whatever slot it is in (behind the cards ahead of it, so it
-     slides out from under them), and only once it is below the frame does it
-     move across to the front slot and rise. Without the exit leg it read as the
-     card blinking out of the stack on click. */
-  const EXIT = 520;
-  const EXIT_EASE = 'cubic-bezier(0.4, 0, 1, 1)';   // accelerates away
-
-  const bringToFront = (idx) => {
-    if (order[0] === idx) return;              // already the front card
-    clearPending();
-    const el = cards[idx];
-    const at = order.indexOf(idx);
-    const rest = order.filter((id) => id !== idx);
-
-    // 1. exit: straight down out of its own slot
-    el.style.transition = `transform ${EXIT}ms ${EXIT_EASE}`;
-    place(el, slot(at), DROP);
-
-    // 2. the cards ahead of it demote one slot, overlapping the exit
-    later(() => rest.forEach((id, i) => place(cards[id], slot(i + 1))), EXIT * 0.55);
-
-    // 3. below the frame, slide across to the front slot with no transition, then
-    //    rise on the stack's own elastic curve
-    later(() => {
-      el.style.transition = 'none';
-      place(el, slot(0), DROP);
-      void el.offsetWidth;
-      el.style.transition = '';
-      place(el, slot(0));
-    }, EXIT);
-
-    order = [idx, ...rest];
-    markFront();
-  };
-
-  const run = () => { clearInterval(timer); timer = setInterval(step, DELAY); };
-
-  const start = () => {
-    if (active) return;
-    active = true;
-    clearPending();
-    compareContent.classList.add('has-swap');
-    comparePanel?.classList.add('has-swap');
-    compareGrid.classList.add('card-swap');
-    // Place without transitions first, or the cards visibly fly in from the grid.
-    cards.forEach((c) => { c.style.transition = 'none'; });
-    order = cards.map((_, i) => i);
-    order.forEach((idx, i) => place(cards[idx], slot(i)));
-    markFront();
-    void compareGrid.offsetHeight;
-    cards.forEach((c) => { c.style.transition = ''; });
-    run();
-  };
-
-  const stop = () => {
-    if (!active) return;
-    active = false;
-    clearPending();
-    clearInterval(timer);
-    timer = null;
-    compareContent.classList.remove('has-swap');
-    comparePanel?.classList.remove('has-swap');
-    compareGrid.classList.remove('card-swap');
-    cards.forEach((c) => {
-      c.style.removeProperty('--slot-t');
-      c.style.removeProperty('--slot-z');
-      c.style.transition = '';
-      c.classList.remove('is-front');
-    });
-  };
-
-  const sync = () => (swapMQ.matches && !reducedMQ.matches ? start() : stop());
-  sync();
-  swapMQ.addEventListener('change', sync);
-  reducedMQ.addEventListener('change', sync);
-  /* Do not rely on the media-query change event alone: the inline transforms this
-     writes are not scoped by media queries, so if a resize slips past, the cards
-     stay skewed and offset in the mobile grid. resize always fires. */
-  window.addEventListener('resize', sync);
-
-  // Rotating copy is unreadable if it moves while you are reading it, so hovering
-  // pauses the carousel and hands control to the reader.
-  compareGrid.addEventListener('pointerenter', () => clearInterval(timer));
-  compareGrid.addEventListener('pointerleave', () => { if (active) run(); });
-
-  /* Tab clicks. Throttled to the transition length so a rage-click cannot queue
-     up half a dozen rotations. The auto-rotation is already paused while the
-     pointer is over the stack, so a chosen card stays put until you leave. */
-  let clickLock = false;
-  cards.forEach((card, i) => {
-    card.querySelector('.card-tab')?.addEventListener('click', () => {
-      if (!active || clickLock) return;
-      if (order[0] === i) return;
-      clickLock = true;
-      bringToFront(i);
-      // Covers the exit leg; the rise can be interrupted by the next choice.
-      setTimeout(() => { clickLock = false; }, EXIT + 180);
-    });
-  });
-
-  /* Over the stack the wheel drives the cards instead of the panel track. The
-     event has to stop here, or the track would also advance a whole panel. The
-     auto-rotation stays paused (pointerenter cleared it) so the reader is in
-     control until the pointer leaves. */
-  let wheelLock = false;
-  compareGrid.addEventListener('wheel', (e) => {
-    if (!active) return;
-    const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (Math.abs(d) < 4) return;
-    e.preventDefault();
-    e.stopPropagation();
-    if (wheelLock) return;
-    wheelLock = true;
-    if (d > 0) step(); else stepBack();
-    setTimeout(() => { wheelLock = false; }, 520);
-  }, { passive: false });
-}
