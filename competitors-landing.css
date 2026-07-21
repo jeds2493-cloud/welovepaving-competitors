@@ -411,19 +411,23 @@ html { scroll-snap-type: y proximity; }
    Transparent: the shared backdrop behind it supplies the asphalt and the veil. */
 .panel--pledge { background: transparent; overflow: hidden; }
 @media (min-width: 901px) {
-  /* Anchored to the top, not centred: with justify-content: center the free space
-     is split evenly and the bottom padding stops reserving room. */
-  .panel--pledge .pledge-inner { justify-content: flex-start; padding-bottom: clamp(56px, 8vh, 88px); }
-  /* P3 is a fixed-height panel: the head, the four service cards, the four
-     pillars and the scroll cue all have to land inside one viewport, so the
-     spacing here is tighter than the same component gets on a scrolling page. */
-  .panel--pledge .pledge-inner { gap: clamp(11px, 1.5vh, 18px); }
-  /* Tall as the panel allows: past ~16vh the inner starts to overflow and the
-     container becomes a nested scroller that would steal the wheel. */
-  .panel--pledge .cond-media { height: clamp(118px, 16vh, 190px); }
-  .panel--pledge .cond-card p { margin-bottom: 10px; }
-  .panel--pledge .pledge-card { padding: 12px 14px; }
-  .panel--pledge .pledge-card h3 { font-size: clamp(15px, 1.25vw, 17px); margin-bottom: 4px; }
+  /* A full screen, like the hero and the comparison, so every section the snap
+     can land on is exactly one viewport. */
+  .panel--pledge { min-height: calc(100svh - var(--utility-h) - var(--header-h)); }
+  .panel--pledge .pledge-inner {
+    justify-content: flex-start;
+    min-height: calc(100svh - var(--utility-h) - var(--header-h));
+    padding: clamp(28px, 4vh, 48px) clamp(24px, 5vw, 64px) clamp(32px, 5vh, 56px);
+    gap: clamp(14px, 2vh, 24px);
+  }
+  /* The service cards take whatever the heading and the pillars leave, so they
+     grow with the screen instead of being pinned to a fixed media height. */
+  .panel--pledge .cond-grid { flex: 1; min-height: 0; grid-auto-rows: 1fr; }
+  .panel--pledge .cond-card { height: 100%; }
+  .panel--pledge .cond-media { flex: 1; height: auto; min-height: 140px; }
+  .panel--pledge .cond-card p { margin-bottom: 12px; }
+  .panel--pledge .pledge-card { padding: 14px 16px; }
+  .panel--pledge .pledge-card h3 { font-size: clamp(15px, 1.25vw, 17px); margin-bottom: 5px; }
 }
 .pledge-inner {
   position: relative; z-index: 4;
