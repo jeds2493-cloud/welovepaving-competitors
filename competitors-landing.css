@@ -941,7 +941,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     transform: translate3d(
       var(--px, 0px),
       calc(var(--py, 0px) + var(--scene-y, 0px)),
-      0) scale(1.28);
+      0) scale(1.54);
   }
   /* The art's left edge is a hard cut against the copy's background, so it is
      dissolved rather than butted up. */
@@ -978,11 +978,15 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     margin: 0;
     align-items: center;
     min-height: calc(100svh - var(--utility-h) - var(--header-h));
-    padding: clamp(32px, 5vh, 64px) clamp(28px, 4vw, 80px);
+    /* The left edge is the header logo's own: the header centres a 1440 container
+       and pads it 24px, so this reproduces that offset and the copy lines up with
+       the logo at every width, not only at 1440. The percentage resolves against
+       the panel, not 100vw, which would count the scrollbar and land ~7px right
+       of the logo. */
+    padding: clamp(32px, 5vh, 64px) clamp(24px, 3vw, 48px)
+             clamp(32px, 5vh, 64px) calc(max(0px, (100% - 1440px) / 2) + 24px);
   }
-  /* Centred inside that column, so it holds its relationship to the art at any
-     width instead of drifting toward the middle of the screen. */
-  .hero-content { margin-inline: auto; }
+  .hero-content { margin-inline: 0; }
 
   /* P2 stops being a transparent panel over the scene and becomes its own dark
      section, so the six cards read as a set instead of floating on the art. */
