@@ -892,10 +892,13 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     width: 100%; height: 42dvh;
     object-fit: cover; object-position: 50% 0%;
     transform-origin: 50% 0%;
+    /* The -15% lift is of the art's own height, so it holds at any viewport: it
+       trims sky off the top (the layer clips it) and what it uncovers below is
+       the black the art already fades into. */
     transform: translate3d(
       var(--px, 0px),
       calc(var(--py, 0px) + var(--scene-y, 0px)),
-      0) scale(1.02);
+      0) translateY(-15%) scale(1.02);
   }
   .h-track {
     position: static; display: block; overflow: visible; scroll-snap-type: none; height: auto;
