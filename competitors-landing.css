@@ -1,0 +1,1180 @@
+/* ============================================================
+   WLP — Competitor Comparison landing (horizontal scroll)
+   Self-contained. Shares the WLP design tokens with the other
+   landings but uses a horizontal panel layout (V2 mockup).
+   ============================================================ */
+
+/* ============ TOKENS ============ */
+:root {
+  --bg-dark: #14120E;
+  --bg-dark-2: #1B1813;
+  --bg-card-dark: #201C16;
+  --card-white: #FFFFFF;
+  --yellow: #F2C230;
+  --yellow-hover: #E0AF1E;
+  --text-dark: #1A1712;
+  --text-body: #4A453C;
+  --text-muted-dark: #A8A192;
+  --border-dark: #322D24;
+  --error-red: #D93838;
+
+  --font-display: 'Barlow Semi Condensed', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --ease-mech: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Damped overshoot, the CSS stand-in for GSAP's elastic.out. A cubic-bezier
+     cannot oscillate past its endpoint more than once, so this is spelled out as
+     a linear() curve: overshoot to ~1.21, settle back through a couple of
+     decreasing bounces. Browsers without linear() fall back to the ease default. */
+  /* Damped overshoot, the CSS stand-in for GSAP's elastic.out. A cubic-bezier
+     cannot oscillate past its endpoint at all, so this is spelled out as a
+     linear() curve. Tuned gentle on purpose: it eases in slowly, overshoots only
+     to ~1.06 and settles once, rather than snapping and ringing. */
+  --ease-elastic: linear(
+    0, 0.02 4%, 0.09 8%, 0.21 13%, 0.37 18%, 0.55 24%, 0.72 30%,
+    0.86 36%, 0.96 42%, 1.03 48%, 1.06 54%, 1.06 60%, 1.04 68%,
+    1.01 78%, 1 88%, 1
+  );
+
+  --utility-h: 35px;
+  --header-h: 66px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+/* Mobile browsers inflate text on their own ("font boosting") when a text block
+   is much wider than the viewport, which silently breaks a tuned type scale.
+   The layout is already responsive, so opt out and keep the sizes we set. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  background: var(--bg-dark);
+  color: var(--card-white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  /* The page scrolls vertically. The hero zone is one viewport tall and holds the
+     horizontal-scroll track (hero + comparison + quality); the FAQ/form and footer
+     flow vertically below it. */
+  overflow-x: hidden;
+}
+/* Hero zone: chrome on top, the horizontal track fills the rest of the viewport. */
+.hero-zone { height: 100dvh; display: flex; flex-direction: column; }
+/* While moving through the first three (horizontal) sections the page cannot scroll
+   vertically at all — only the track moves sideways. The class goes on <html> (the
+   scrolling root); JS drops it once the last panel is reached so the FAQ/form/footer
+   below become scrollable. */
+html.h-locked { overflow: hidden; height: 100%; }
+html.h-locked body { overflow: hidden; }
+img { max-width: 100%; display: block; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02em; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+
+.icon {
+  width: 1em; height: 1em; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ============ BUTTONS ============ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 26px; border-radius: 8px;
+  font-family: var(--font-display); font-weight: 700; font-size: 16px;
+  letter-spacing: 0.02em; text-transform: uppercase;
+  border: none; cursor: pointer; min-height: 48px; white-space: nowrap;
+  transition: background 0.15s var(--ease-mech), transform 0.15s var(--ease-mech), border-color 0.15s var(--ease-mech), color 0.15s var(--ease-mech);
+}
+.btn-primary { background: var(--yellow); color: var(--text-dark); }
+.btn-primary:hover { background: var(--yellow-hover); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-outline { background: transparent; color: var(--card-white); border: 1.5px solid rgba(255,255,255,0.55); }
+.btn-outline:hover { border-color: var(--yellow); color: var(--yellow); }
+.btn-dark { background: var(--bg-dark-2); color: var(--card-white); }
+.btn-dark:hover { background: #000; color: var(--card-white); }
+.btn-outline-dark { background: transparent; color: var(--text-dark); border: 1.5px solid rgba(20,18,14,0.32); }
+.btn-outline-dark:hover { border-color: var(--text-dark); background: var(--text-dark); color: var(--card-white); }
+.btn-sm { padding: 10px 18px; font-size: 14px; min-height: 44px; }
+
+/* ============ UTILITY BAR ============ */
+.utility-bar {
+  flex: none; background: #100E0B; border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 9px 0;
+  position: relative; z-index: 20;   /* stay above the fixed scene backdrop on mobile */
+}
+.utility-bar ul {
+  list-style: none; margin: 0 auto; padding: 0 24px;
+  max-width: 1440px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px 26px; flex-wrap: wrap;
+}
+/* Same treatment as the utility bars on the other landings: body font, no mono,
+   no uppercase, no tracking. */
+.utility-bar li {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 600; color: #F2F0EA;
+}
+.utility-bar .icon { width: 15px; height: 15px; color: var(--yellow); flex: none; }
+
+/* Marquee scaffold, inert off mobile: display:contents drops the wrapper from the
+   box tree so the single list centres exactly as before, and the duplicate copy
+   is hidden. The mobile block below switches it on. */
+.util-track { display: contents; }
+/* Scoped with .utility-bar so it outranks `.utility-bar ul`, which would
+   otherwise force the clone back to display:flex and show the badges twice. */
+.utility-bar .util-clone { display: none; }
+@keyframes util-marquee { to { transform: translateX(-50%); } }
+/* Reduced motion: stop the scroll and let the row be swiped by hand instead, so
+   every badge is still reachable without animation. */
+@media (prefers-reduced-motion: reduce) {
+  .util-track { animation: none; }
+  .utility-bar { overflow-x: auto; touch-action: pan-x; }
+}
+
+/* ============ HEADER ============ */
+.site-header {
+  flex: none; background: rgba(20,18,14,0.96); border-bottom: 1px solid var(--border-dark);
+  position: relative; z-index: 20;   /* stay above the fixed scene backdrop on mobile */
+}
+.header-inner {
+  max-width: 1440px; margin: 0 auto; padding: 11px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.header-brand { display: flex; align-items: center; gap: 16px; flex: none; }
+.header-logo { height: 40px; width: auto; }
+.header-actions { display: flex; align-items: center; }
+/* On the hero the CTA is collapsed to zero width, so the phone sits flush at the
+   far right (where the button will be). Reaching the second panel expands the CTA
+   in from the right — it grows into place and pushes the phone number left. */
+.header-cta {
+  max-width: 0; margin-left: 0; padding-left: 0; padding-right: 0;
+  opacity: 0; pointer-events: none; overflow: hidden; white-space: nowrap;
+  transform: translateX(14px);
+  transition: max-width 0.42s var(--ease-mech), margin 0.42s var(--ease-mech),
+              padding 0.42s var(--ease-mech), opacity 0.3s var(--ease-mech),
+              transform 0.42s var(--ease-mech);
+}
+body.past-hero .header-cta {
+  max-width: 280px; margin-left: 18px; padding-left: 18px; padding-right: 18px;
+  opacity: 1; pointer-events: auto; transform: translateX(0);
+}
+.header-phone { text-align: right; }
+.header-phone-label {
+  display: block; font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted-dark);
+}
+.header-phone-num {
+  display: flex; align-items: center; gap: 7px; justify-content: flex-end;
+  color: var(--card-white); font-family: var(--font-display); font-weight: 800; font-size: 20px;
+}
+.header-phone:hover .header-phone-num { color: var(--yellow); }
+
+/* ============ STAGE + SHARED SCENE ============
+   The stage fills everything under the header. One scene image lives behind the
+   whole panel track and pans left as you scroll, so the panda travels from the
+   right (hero) toward the left (later panels) over a single continuous backdrop
+   — no per-section image, no seam. */
+.stage { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+
+.scene-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #0E0C0A; }
+.scene-bg img {
+  position: absolute; top: 0; left: 0;
+  width: 150%; height: 100%; max-width: none;
+  object-fit: cover; object-position: 50% 100%;
+  /* --scene-x = scroll-driven pan; --px/--py = light pointer drift. scale hides
+     the drift's edges and keeps coverage at the pan extremes. */
+  transform: translate3d(calc(var(--scene-x, 0px) + var(--px, 0px)), var(--py, 0px), 0) scale(1.06);
+  transform-origin: center bottom;
+  will-change: transform;
+}
+
+/* ============ HORIZONTAL PANEL TRACK (over the scene) ============ */
+.h-track {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;            /* Firefox — hide the scrollbar */
+  -ms-overflow-style: none;         /* old Edge */
+}
+.h-track::-webkit-scrollbar { width: 0; height: 0; display: none; }  /* Chrome / Safari */
+.panel {
+  flex: 0 0 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  position: relative;
+  overflow-y: auto;
+  background: transparent;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.panel::-webkit-scrollbar { width: 0; height: 0; display: none; }
+/* Per-panel legibility scrim, weighted toward whichever side holds the copy.
+   It scrolls in with its panel so the darkening tracks the content, not the scene. */
+.panel-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.scrim--left {
+  background:
+    radial-gradient(90% 120% at 74% 55%, rgba(14,12,10,0) 0%, rgba(14,12,10,0.28) 62%, rgba(14,12,10,0.6) 100%),
+    linear-gradient(270deg, rgba(14,12,10,0.04) 0%, rgba(14,12,10,0.10) 34%, rgba(14,12,10,0.50) 50%, rgba(14,12,10,0.93) 62%, rgba(14,12,10,0.98) 78%);
+}
+.scrim--right {
+  background:
+    radial-gradient(90% 120% at 26% 55%, rgba(14,12,10,0) 0%, rgba(14,12,10,0.30) 62%, rgba(14,12,10,0.62) 100%),
+    linear-gradient(90deg, rgba(14,12,10,0.02) 0%, rgba(14,12,10,0.10) 30%, rgba(14,12,10,0.55) 48%, rgba(14,12,10,0.90) 62%, rgba(14,12,10,0.98) 80%);
+}
+
+/* ============ P1 · HERO ============ */
+/* The copy drifts a touch opposite the cursor for a subtle layered feel with the
+   scene behind it (desktop pointer only, off under reduced motion). --px/--py
+   are set on .stage by JS; the scene image reads them too. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-content {
+    transform: translate3d(calc(var(--px, 0px) * -0.35), calc(var(--py, 0px) * -0.35), 0);
+    transition: transform 0.4s var(--ease-mech);
+  }
+}
+.hero-inner {
+  position: relative; z-index: 4;
+  max-width: 1440px; margin: 0 auto; height: 100%;
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 0 clamp(24px, 5vw, 64px);
+}
+
+.hero-content { max-width: 600px; }
+.hero-content .eyebrow {
+  font-family: var(--font-mono); font-size: 13.5px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow);
+  margin-bottom: 16px;
+}
+.hero-content h1 {
+  font-size: clamp(32px, 4.2vw, 58px); line-height: 1.02; font-weight: 900;
+  text-transform: uppercase; color: var(--card-white); margin-bottom: 18px;
+}
+.hero-content .lede {
+  font-size: clamp(15px, 1.5vw, 18px); line-height: 1.5; color: #D6D3CB;
+  max-width: 48ch; margin-bottom: 22px;
+}
+/* Two columns filled top-to-bottom, four then three: the long protection claims
+   keep the wider left column and the four service names sit in the narrower
+   right one, instead of alternating and leaving ragged rows. */
+.hero-bullets {
+  list-style: none; margin: 0 0 26px; padding: 0;
+  display: grid; grid-auto-flow: column;
+  grid-template-rows: repeat(4, auto);
+  grid-template-columns: auto auto;
+  justify-content: start;
+  column-gap: clamp(24px, 3vw, 48px); row-gap: 10px;
+}
+.hero-bullets li {
+  display: flex; align-items: baseline; gap: 10px;
+  font-size: 15px; color: #F2F0EA;
+}
+.hero-bullets li::before { content: ""; width: 6px; height: 6px; background: var(--yellow); flex: none; transform: translateY(-1px); }
+.hero-bullets b { font-family: var(--font-display); font-weight: 800; font-size: 16px; }
+/* The asterisk stands in for the terms line: it links to the disclaimer in the
+   footer so the hero carries the claim and the footer carries the conditions. */
+.hero-bullets .terms-ref {
+  color: #fff; font-weight: 700; font-size: 15px;
+  text-decoration: none; padding: 0 2px;
+}
+.hero-bullets .terms-ref:hover,
+.hero-bullets .terms-ref:focus-visible { text-decoration: underline; }
+
+
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Mobile-only scroll cue (see the mobile block for the rest). */
+.hero-scroll { display: none; }
+
+/* ============ P2 · WHAT TO COMPARE ============
+   No image of its own — the shared scene shows through, panned so the panda is on
+   the left. The content (heading + six white cards + CTA) sits on the right over
+   the scrim-darkened side of the scene. */
+.compare-inner {
+  position: relative; z-index: 4;
+  max-width: 1440px; margin: 0 auto; height: 100%;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: clamp(24px, 4vh, 48px) clamp(24px, 5vw, 64px);
+}
+.compare-content {
+  max-width: 720px; width: 100%;
+  display: flex; flex-direction: column;
+}
+.compare-head { margin-bottom: clamp(16px, 2.6vh, 26px); }
+.compare-content h2 {
+  font-size: clamp(24px, 2.7vw, 38px); line-height: 1.04; font-weight: 900;
+  text-transform: uppercase; color: var(--card-white); margin-bottom: 12px;
+}
+.compare-content .sub {
+  font-size: clamp(14px, 1.3vw, 16px); line-height: 1.5; color: #D6D3CB;
+  max-width: 56ch;
+}
+.compare-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(11px, 1vw, 16px);
+}
+/* Folder-tab cards: a yellow tab carries the title and the dark panel below it
+   carries the question plus our answer. The card itself is only the wrapper — the
+   panel is what gets the fill, the border and the gold glow. */
+.compare-card {
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.card-tab {
+  display: flex; align-items: center; gap: 7px;
+  /* Half-ish width, equal on every card, so the stack still reads as a folder
+     index rather than six full-width headers. */
+  width: 62%;
+  /* On narrow cards 62% is not enough for the longest titles and they wrap, which
+     makes that one tab taller than the rest. Floor it at the width the longest
+     title needs. */
+  min-width: min(100%, 250px);
+  background: var(--yellow); color: var(--text-dark);
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.02em;
+  line-height: 1; padding: 8px 15px 7px;
+  border-radius: 10px 10px 0 0;
+}
+.card-tab .icon { flex: none; width: 14px; height: 14px; }
+/* The tab is a fixed fraction of the card, so long titles have to fit rather than
+   wrap — a wrapped tab would be taller than its neighbours and break the row. */
+.card-tab span { min-width: 0; }
+/* Square top-left so the panel reads as continuing from under the tab. */
+.card-panel {
+  width: 100%; flex: 1;
+  background: var(--bg-dark-2); border: 1px solid var(--border-dark);
+  border-radius: 0 10px 10px 10px; padding: clamp(13px, 1.2vw, 17px);
+}
+.card-q { font-size: 13px; line-height: 1.42; color: #C8C5BD; }
+/* The "we do this" line — the whole point of the comparison. */
+.card-a {
+  display: flex; gap: 8px; align-items: flex-start;
+  margin-top: 11px; padding-top: 10px;
+  border-top: 1px solid rgba(242,194,48,0.20);
+  font-size: 12.5px; line-height: 1.4; font-weight: 600; color: #fff;
+}
+.card-a .icon { flex: none; width: 15px; height: 15px; margin-top: 1px; color: var(--yellow); }
+
+/* "Keep scrolling" cue replacing the old CTA — nudges the user on to the next
+   panel (why WLP wins) instead of asking them to act yet. */
+.scroll-next {
+  margin-top: clamp(16px, 2.6vh, 24px);
+  display: inline-flex; align-items: center; gap: 16px;
+  background: none; border: none; padding: 6px 2px; cursor: pointer;
+  text-align: left; font-family: inherit;
+  align-self: center;
+}
+.scroll-next__text { display: flex; flex-direction: column; gap: 2px; }
+.scroll-next__text b {
+  font-family: var(--font-display); font-weight: 800; font-size: 15px;
+  text-transform: uppercase; letter-spacing: 0.01em; color: #fff;
+}
+.scroll-next__text span { font-size: 13.5px; line-height: 1.4; color: #C8C5BD; }
+.scroll-next__arrow {
+  flex: none; width: 44px; height: 44px; border-radius: 50%;
+  border: 1.5px solid rgba(242,194,48,0.5);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--yellow); font-size: 20px;
+  animation: nudge-y 1.5s var(--ease-mech) infinite;
+  transition: background 0.2s var(--ease-mech), border-color 0.2s var(--ease-mech), color 0.2s var(--ease-mech);
+}
+.scroll-next:hover .scroll-next__arrow {
+  background: var(--yellow); color: var(--text-dark); border-color: var(--yellow);
+  animation-play-state: paused;
+}
+@keyframes nudge-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+@keyframes hero-chevron {
+  0%, 100% { transform: translateY(0); opacity: 0.45; }
+  40%      { transform: translateY(6px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll__chevrons svg { animation: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .scroll-next__arrow { animation: none; } }
+
+/* ============ P3 · THE QUALITY OF OUR WORK (horizontal panel) ============
+   The asphalt background is top-aligned at the SAME 100%-width scale as the
+   post-hero background below it; JS offsets the post-hero crop by the panel height
+   (--posthero-bg-y) so the two are one continuous image across the handoff. */
+.panel--pledge { background: #0E0C0A; overflow: hidden; }
+/* Last horizontal panel: the cue sits centred at the very bottom and points down,
+   because from here the page hands off to the vertical section. */
+@media (min-width: 901px) {
+  .panel--pledge .scroll-next {
+    position: absolute; z-index: 3;
+    left: 50%; bottom: clamp(10px, 2vh, 22px);
+    transform: translateX(-50%); margin-top: 0;
+  }
+  /* Anchored to the top, not centred: with justify-content: center the free
+     space is split evenly and the bottom padding stops reserving room, so the
+     pillars ran into the scroll cue. */
+  .panel--pledge .pledge-inner { justify-content: flex-start; padding-bottom: clamp(96px, 13vh, 140px); }
+  /* P3 is a fixed-height panel: the head, the four service cards, the four
+     pillars and the scroll cue all have to land inside one viewport, so the
+     spacing here is tighter than the same component gets on a scrolling page. */
+  .panel--pledge .pledge-inner { gap: clamp(11px, 1.5vh, 18px); }
+  /* Tall as the panel allows: past ~16vh the inner starts to overflow and the
+     container becomes a nested scroller that would steal the wheel. */
+  .panel--pledge .cond-media { height: clamp(118px, 16vh, 190px); }
+  .panel--pledge .cond-card p { margin-bottom: 10px; }
+  .panel--pledge .pledge-card { padding: 12px 14px; }
+  .panel--pledge .pledge-card h3 { font-size: clamp(15px, 1.25vw, 17px); margin-bottom: 4px; }
+}
+.pledge-bg {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+  background: url("images/pledge-bg.webp") top center / 100% auto no-repeat;
+}
+.pledge-bg::after {
+  content: ""; position: absolute; inset: 0;
+  /* Two veils: the left one keeps the seam with P2 invisible, the vertical one
+     is what makes the heading and the card copy readable over the asphalt. The
+     content spans the full width here, so the whole frame needs darkening, not
+     just the left third. */
+  background:
+    linear-gradient(90deg, #0E0C0A 0%, rgba(14,12,10,0.60) 12%, rgba(14,12,10,0.16) 34%),
+    linear-gradient(180deg, rgba(14,12,10,0.86) 0%, rgba(14,12,10,0.62) 26%, rgba(14,12,10,0.52) 62%, rgba(14,12,10,0.74) 100%);
+}
+.pledge-inner {
+  position: relative; z-index: 4;
+  max-width: 1440px; margin: 0 auto; height: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+  gap: clamp(16px, 2.4vh, 26px);
+  padding: clamp(24px, 4vh, 48px) clamp(24px, 5vw, 64px);
+  overflow-y: auto;
+}
+.pledge-head h2 {
+  font-size: clamp(24px, 2.9vw, 42px); line-height: 1.02; font-weight: 900;
+  text-transform: uppercase; color: #fff;
+}
+.pledge-head h2 .hl,
+.compare-content h2 .hl { color: var(--yellow); }
+.pledge-head .sub {
+  font-size: clamp(14px, 1.35vw, 16px); line-height: 1.5; color: #C8C5BD;
+  max-width: 64ch; margin-top: 10px;
+}
+
+
+.pledge-kicker {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow);
+}
+
+/* Service cards. Same component as the striping and concrete landings (cond-*),
+   kept class-for-class so the three landings share one piece. Differences here
+   are the panel context only: this one lives in a fixed-height horizontal panel,
+   so the media band is shorter and the card never opens a lightbox. */
+.cond-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(11px, 1vw, 16px); }
+.cond-card {
+  background: var(--bg-dark-2); border: 1px solid var(--border-dark);
+  border-radius: 12px; overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform 0.2s var(--ease-mech), box-shadow 0.2s var(--ease-mech);
+}
+/* Gated on a real pointer: on touch, :hover sticks after a tap and the card
+   would stay raised. */
+@media (hover: hover) and (pointer: fine) {
+  .cond-card:hover { transform: translateY(-5px); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+}
+.cond-body { padding: clamp(12px, 1.1vw, 16px) clamp(12px, 1.1vw, 16px) 0; }
+.cond-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #2E2A22; border: 1px solid #3A352B; color: #B8B5AD;
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; padding: 5px 11px; border-radius: 20px;
+}
+.cond-tag .icon { width: 12px; height: 12px; color: var(--yellow); }
+.cond-card h3 {
+  font-family: var(--font-display); font-size: clamp(15px, 1.3vw, 18px); font-weight: 800;
+  line-height: 1.12; color: #fff; text-transform: uppercase; margin: 12px 0 7px;
+}
+.cond-card p { font-size: 12.5px; line-height: 1.42; color: #C8C5BD; margin-bottom: 14px; }
+.cond-media { height: clamp(96px, 14vh, 150px); border-top: 1px solid #2E2A22; border-bottom: 1px solid #2E2A22; }
+.cond-media img { width: 100%; height: 100%; object-fit: cover; }
+.cond-foot { padding: clamp(12px, 1.1vw, 16px); margin-top: auto; }
+.cond-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--yellow); color: var(--text-dark);
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 800;
+  letter-spacing: 0.06em; padding: 11px 15px; border-radius: 6px;
+  text-decoration: none; min-height: 44px; box-sizing: border-box;
+}
+.cond-link .icon { width: 14px; height: 14px; }
+.cond-link:hover { background: var(--yellow-hover); color: var(--text-dark); }
+
+/* Quality pillars */
+.pledge-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(11px, 1vw, 16px); }
+.pledge-card {
+  background: var(--bg-dark-2); border: 1px solid var(--border-dark);
+  border-radius: 10px; padding: clamp(14px, 1.3vw, 18px);
+}
+.pledge-card h3 {
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.08; color: var(--yellow); margin-bottom: 6px;
+}
+.pledge-card p { font-size: 13px; line-height: 1.42; color: #C8C5BD; }
+
+/* ============ LEGAL MODALS ============
+   Ported from the striping landing so the three landings share one component.
+   A native <dialog>, so the browser owns modality, the focus trap, Esc and the
+   backdrop. Nothing in the footer navigates away from the landing. */
+.legal-modal {
+  border: none; padding: 0; border-radius: 12px;
+  width: min(760px, 94vw); max-height: 88vh;
+  background: var(--card-white);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.legal-modal:not([open]) { display: none; }
+.legal-modal::backdrop { background: rgba(12, 11, 9, 0.86); backdrop-filter: blur(3px); }
+.legal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 20px; border-bottom: 1px solid #E4E0D8; flex: none;
+}
+.legal-head h2 { font-family: var(--font-display); font-size: 19px; font-weight: 800; color: var(--text-dark); }
+.legal-close {
+  width: 40px; height: 40px; flex: none;
+  border: none; border-radius: 50%;
+  background: #EDEAE3; color: var(--text-dark);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.legal-close:hover { background: var(--yellow); }
+/* The body scrolls, not the dialog: the header stays put on long documents. */
+.legal-body {
+  overflow-y: auto; padding: 20px;
+  font-size: 14px; line-height: 1.65; color: var(--text-body);
+}
+/* The fragments arrive with every attribute stripped, so this styles bare tags
+   and depends on no class name from the source page. They are normalised to
+   start at h3 (the dialog's own title is the h2), with h4 for subsections. */
+.legal-body h3 { font-size: 16px; font-weight: 800; margin: 24px 0 8px; color: var(--text-dark); }
+.legal-body h4 {
+  font-size: 13.5px; font-weight: 800; margin: 16px 0 6px; color: var(--text-dark);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.legal-body > :first-child { margin-top: 0; }
+.legal-body p { margin: 0 0 12px; }
+.legal-body ul, .legal-body ol { margin: 0 0 14px; padding-left: 20px; }
+.legal-body li { margin-bottom: 6px; }
+.legal-body a { color: #0B63C5; text-decoration: underline; }
+.legal-body strong { color: var(--text-dark); }
+.legal-body img, .legal-body table { max-width: 100%; }
+.legal-loading { font-family: var(--font-mono); font-size: 12px; color: #7A756A; }
+
+/* ============ SERVICE REQUEST MODAL ============
+   The card morphs into this panel: JS measures the card, then plays a FLIP from
+   that rect to the panel's resting rect. The panel itself is a plain centred
+   dialog, so if the animation never runs (reduced motion, no Web Animations) the
+   modal still opens correctly. */
+/* The page scrolls on <html>, not body (see .h-locked), so the modal's scroll
+   lock goes on the same element. */
+html.svc-open, html.svc-open body { overflow: hidden; }
+.svc-modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; }
+.svc-modal[hidden] { display: none; }
+/* A vignette rather than a flat wash: lighter behind the panel, darker at the
+   edges, so the page reads as pushed back instead of switched off. */
+.svc-modal__scrim {
+  position: absolute; inset: 0;
+  background: radial-gradient(125% 100% at 50% 45%,
+    rgba(8, 7, 5, 0.62) 0%,
+    rgba(8, 7, 5, 0.80) 55%,
+    rgba(8, 7, 5, 0.90) 100%);
+  backdrop-filter: blur(7px) saturate(0.85);
+  -webkit-backdrop-filter: blur(7px) saturate(0.85);
+}
+.svc-modal__panel {
+  position: relative;
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(92vh, 900px);
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--bg-dark-2); border: 1px solid var(--border-dark);
+  border-radius: 16px; box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+  padding: clamp(18px, 2.4vw, 28px);
+  /* The FLIP scales the whole panel, so the origin has to be the same point the
+     transform maths uses: the centre. */
+  transform-origin: center center;
+}
+.svc-modal__close {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--border-dark);
+  color: #E7E4DD; cursor: pointer;
+  transition: background 0.2s var(--ease-mech), color 0.2s var(--ease-mech);
+}
+.svc-modal__close:hover { background: var(--yellow); color: var(--text-dark); border-color: var(--yellow); }
+.svc-modal__eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow);
+  margin-bottom: 12px; padding-right: 44px;
+}
+/* The lead card is moved in here whole, so it drops its own frame and lets the
+   panel be the frame. */
+.svc-modal__body .lead-card {
+  background: none; border: none; border-radius: 0; padding: 0; box-shadow: none;
+}
+/* With no service eyebrow (the plain CTAs) the heading starts at the top of the
+   panel, where the close button is. */
+.svc-modal__body .lead-card h2 { padding-right: 44px; }
+.svc-modal__eyebrow:not([hidden]) + .svc-modal__body .lead-card h2 { padding-right: 0; }
+
+/* ============ BORDER GLOW on the P2 cards ============
+   Vanilla port of React Bits <BorderGlow> (same as the Panda Pledge cards on the
+   other landings), recoloured to WLP gold. Pointer proximity to the nearest edge
+   drives --edge-proximity + --cursor-angle (set in JS); a gradient ring (::before),
+   a soft interior fill (::after) and an outer glow (.edge-light) fade in near an
+   edge. Desktop pointer only; .edge-light is injected by JS, so with JS off the
+   cards stay plain. */
+@media (hover: hover) and (pointer: fine) {
+  .glow-card {
+    --edge-proximity: 0;
+    --cursor-angle: 45deg;
+    --edge-sensitivity: 30;
+    --color-sensitivity: calc(var(--edge-sensitivity) + 20);
+    --glow-padding: 26px;
+    --cone-spread: 25;
+    --fill-opacity: 0.5;
+    --card-bg: var(--bg-dark-2);
+
+    --glow-color:    hsl(45deg 90% 62% / 100%);
+    --glow-color-60: hsl(45deg 90% 62% / 60%);
+    --glow-color-50: hsl(45deg 90% 62% / 50%);
+    --glow-color-40: hsl(45deg 90% 62% / 40%);
+    --glow-color-30: hsl(45deg 90% 62% / 30%);
+    --glow-color-20: hsl(45deg 90% 62% / 20%);
+    --glow-color-10: hsl(45deg 90% 62% / 10%);
+
+    --gradient-one:   radial-gradient(at 80% 55%, #F2C230 0px, transparent 50%);
+    --gradient-two:   radial-gradient(at 69% 34%, #FFE9A8 0px, transparent 50%);
+    --gradient-three: radial-gradient(at 8% 6%,   #B8860B 0px, transparent 50%);
+    --gradient-four:  radial-gradient(at 41% 38%, #F2C230 0px, transparent 50%);
+    --gradient-five:  radial-gradient(at 86% 85%, #FFE9A8 0px, transparent 50%);
+    --gradient-six:   radial-gradient(at 82% 18%, #B8860B 0px, transparent 50%);
+    --gradient-seven: radial-gradient(at 51% 4%,  #FFE9A8 0px, transparent 50%);
+
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    border: 1px solid rgb(255 255 255 / 12%);
+  }
+  .glow-card::before,
+  .glow-card::after,
+  .glow-card > .edge-light {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    transition: opacity 0.25s ease-out;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .glow-card:not(:hover)::before,
+  .glow-card:not(:hover)::after,
+  .glow-card:not(:hover) > .edge-light {
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+  }
+  /* gradient ring */
+  .glow-card::before {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--card-bg) 0 100%) padding-box,
+      linear-gradient(rgb(255 255 255 / 0%) 0 100%) border-box,
+      var(--gradient-one) border-box,
+      var(--gradient-two) border-box,
+      var(--gradient-three) border-box,
+      var(--gradient-four) border-box,
+      var(--gradient-five) border-box,
+      var(--gradient-six) border-box,
+      var(--gradient-seven) border-box;
+    opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+    mask-image: conic-gradient(
+      from var(--cursor-angle) at center,
+      black calc(var(--cone-spread) * 1%),
+      transparent calc((var(--cone-spread) + 15) * 1%),
+      transparent calc((100 - var(--cone-spread) - 15) * 1%),
+      black calc((100 - var(--cone-spread)) * 1%));
+  }
+  /* soft interior fill near the edges */
+  .glow-card::after {
+    border: 1px solid transparent;
+    background:
+      var(--gradient-one) padding-box,
+      var(--gradient-two) padding-box,
+      var(--gradient-three) padding-box,
+      var(--gradient-four) padding-box,
+      var(--gradient-five) padding-box,
+      var(--gradient-six) padding-box,
+      var(--gradient-seven) padding-box;
+    mask-image:
+      linear-gradient(to bottom, black, black),
+      radial-gradient(ellipse at 50% 50%, black 40%, transparent 65%),
+      conic-gradient(from var(--cursor-angle) at center, transparent 5%, black 15%, black 85%, transparent 95%);
+    mask-composite: subtract, add;
+    opacity: calc(var(--fill-opacity) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+    mix-blend-mode: soft-light;
+  }
+  /* outer glow */
+  .glow-card > .edge-light {
+    inset: calc(var(--glow-padding) * -1);
+    z-index: 1;
+    mask-image: conic-gradient(
+      from var(--cursor-angle) at center, black 2.5%, transparent 10%, transparent 90%, black 97.5%);
+    opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
+    mix-blend-mode: plus-lighter;
+  }
+  .glow-card > .edge-light::before {
+    content: "";
+    position: absolute;
+    inset: var(--glow-padding);
+    border-radius: inherit;
+    box-shadow:
+      inset 0 0 0 1px var(--glow-color),
+      inset 0 0 3px 0 var(--glow-color-50),
+      inset 0 0 6px 0 var(--glow-color-40),
+      inset 0 0 15px 0 var(--glow-color-30),
+      inset 0 0 25px 2px var(--glow-color-20),
+      inset 0 0 50px 2px var(--glow-color-10),
+      0 0 3px 0 var(--glow-color-50),
+      0 0 6px 0 var(--glow-color-40),
+      0 0 15px 0 var(--glow-color-30),
+      0 0 25px 2px var(--glow-color-20),
+      0 0 50px 2px var(--glow-color-10);
+  }
+  .glow-card > :not(.edge-light) { position: relative; z-index: 2; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+  .glow-card::before, .glow-card::after, .glow-card > .edge-light { display: none; }
+}
+
+/* ============ VERTICAL SECTIONS (below the hero zone) ============ */
+.lp-container { max-width: 1440px; margin: 0 auto; padding: 0 clamp(24px, 5vw, 64px); }
+
+/* Everything below the hero zone shares one asphalt backdrop that continues the
+   image from P3 (which shows its top) and fades to black by the footer — so the
+   dark background flows on with no seam. */
+.post-hero { position: relative; background: #0E0C0A; isolation: isolate; }
+/* One continuous image with P3: same full-width scale, but the crop starts where
+   P3 left off (--posthero-bg-y = -panelHeight, set by JS) so the asphalt flows on
+   unbroken from the horizontal panel into this vertical zone, fading to black. */
+.post-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: url("images/pledge-bg.webp") center var(--posthero-bg-y, 0px) / 100% auto no-repeat;
+}
+.post-hero::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(14,12,10,0.28) 0%, rgba(14,12,10,0.55) 30%, rgba(14,12,10,0.82) 62%, #0E0C0A 90%);
+}
+.lp-section, .site-footer { position: relative; z-index: 1; }
+
+/* FAQ + lead form — dark, over the shared asphalt backdrop. */
+.lp-section { background: transparent; padding: clamp(48px, 7vh, 84px) 0; }
+.lp-h2 {
+  font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em;
+  font-size: clamp(26px, 3.2vw, 40px); line-height: 1.05; text-transform: uppercase;
+  color: #fff; max-width: 20ch;
+}
+.faq-form-grid {
+  display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(28px, 4vw, 60px);
+  align-items: start;
+}
+
+.faq-list { display: flex; flex-direction: column; gap: 10px; margin-top: clamp(18px, 3vh, 28px); }
+.faq-item {
+  border: 1px solid var(--border-dark); border-radius: 10px; overflow: hidden;
+  background: rgba(27,24,19,0.86); backdrop-filter: blur(2px);
+}
+.faq-q {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 15px 18px; background: none; border: none; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 15px; line-height: 1.3;
+  color: #fff; text-align: left;
+}
+.faq-q .icon { color: var(--yellow); font-size: 18px; flex: none; transition: transform 0.2s var(--ease-mech); }
+.faq-q[aria-expanded="true"] .icon { transform: rotate(180deg); }
+.faq-a {
+  padding: 0 18px 16px; margin-top: -2px;
+  font-size: 13.5px; line-height: 1.55; color: #C8C5BD;
+}
+.faq-a[hidden] { display: none; }
+
+/* Dark lead-form card holding the WLP embed. */
+.lead-card { background: var(--bg-dark-2); border: 1px solid var(--border-dark); border-radius: 14px; padding: clamp(22px, 2.4vw, 32px); }
+.lead-card h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(20px, 2.1vw, 26px); line-height: 1.12; color: #fff; }
+.lead-card-sub { font-size: 14px; line-height: 1.5; color: #C8C5BD; margin: 8px 0 18px; max-width: 46ch; }
+.hero-embed { min-height: 320px; }
+.wlpquote-here iframe { width: 100%; display: block; border: 0; }
+.hero-embed .wlpquote-here:empty::before {
+  content: "The project review form loads here."; display: flex; align-items: center; justify-content: center;
+  min-height: 320px; text-align: center; padding: 20px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-muted-dark);
+  border: 1px dashed var(--border-dark); border-radius: 10px;
+}
+.form-note { font-size: 12px; line-height: 1.45; color: var(--text-muted-dark); text-align: center; margin-top: 12px; }
+
+/* ============ FOOTER ============ */
+.site-footer { background: transparent; border-top: 1px solid rgba(255,255,255,0.07); padding: clamp(30px, 5vh, 46px) 0; }
+.footer-top { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 18px; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-logo { height: 40px; width: auto; }
+.footer-phone { display: flex; align-items: center; gap: 7px; color: var(--card-white); }
+.footer-phone .icon { color: var(--yellow); }
+.footer-phone span { font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.footer-phone:hover { color: var(--yellow); }
+.footer-tagline { font-size: 12px; font-weight: 500; color: var(--text-muted-dark); margin-top: 2px; }
+.footer-license { font-size: 12px; line-height: 1.7; font-weight: 600; color: var(--text-muted-dark); text-align: right; }
+.coverage { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 9px; }
+.coverage li {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+  background: var(--bg-dark-2); border: 1px solid var(--border-dark); color: #D6D3CB;
+  padding: 7px 13px; border-radius: 20px;
+}
+.coverage .icon { color: var(--yellow); font-size: 13px; }
+.footer-links {
+  list-style: none; margin: 0 0 14px; padding: 12px 0; display: flex; gap: 16px; flex-wrap: wrap;
+  font-size: 12px; font-weight: 600;
+  border-top: 1px solid var(--border-dark); border-bottom: 1px solid var(--border-dark);
+}
+.footer-links a { color: #D6D3CB; }
+.footer-links a:hover { color: var(--yellow); }
+.footer-legal { font-size: 11px; line-height: 1.55; color: #94908A; max-width: 120ch; margin-bottom: 8px; }
+.footer-legal b { color: #B8B3AA; }
+
+/* ============ MOBILE / REDUCED MOTION — degrade to vertical ============
+   The stage stops being a fixed viewport; panels stack normally. The scene
+   becomes a fixed backdrop the stacked content scrolls over (still one shared
+   background), with a stronger bottom-up scrim on each panel for legibility. */
+@media (max-width: 900px), (prefers-reduced-motion: reduce) {
+  body { overflow-x: hidden; }
+  .hero-zone { height: auto; display: block; }
+  .stage { position: static; flex: none; height: auto; overflow: visible; }
+  .faq-form-grid { grid-template-columns: 1fr; }
+  .footer-license { text-align: left; }
+  .scene-bg { position: fixed; inset: 0; }
+  /* The mobile art puts the whole scene in its top half and fades to black below,
+     so it is the layout: the art reads clean up top and the copy sits in the
+     black, with no box or overlay of its own. Anchored to the top so the panda
+     never slides under the chrome. */
+  /* Chrome pinned to the top for the whole page. It is fixed rather than sticky
+     because both bars live inside .hero-zone, and a sticky element stops sticking
+     once its own container scrolls past: the header would have vanished at the
+     FAQ. The zone reserves their height so nothing starts underneath them. */
+  .utility-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 51; }
+  /* Fully opaque now that content scrolls under it: at 0.96 the headline ghosted
+     through the bar. */
+  .site-header {
+    position: fixed; top: var(--utility-h); left: 0; right: 0; z-index: 50;
+    background: #14120E;
+  }
+  .hero-zone { padding-top: calc(var(--utility-h) + var(--header-h)); }
+
+  /* The layer starts below the chrome rather than behind it: the art is composed
+     with the panda's hard hat near its top edge, and a full-viewport layer put
+     that hat under the header. Once the chrome scrolls away the strip it leaves
+     is covered by the layer's own dark fill and, by then, P2's flat scrim. */
+  .scene-bg {
+    top: calc(var(--utility-h) + var(--header-h));
+    background: var(--bg-dark);
+  }
+  /* Pulled up so only a sliver of sky sits above the hard hat, the way the art is
+     composed. The layer clips the overshoot, and the black the image fades into
+     rises with it, right under the copy. */
+  .scene-bg img {
+    width: 100%; object-position: 50% 0%;
+    transform-origin: 50% 0%;
+    transform: translate3d(
+      var(--px, 0px),
+      calc(var(--py, 0px) - 45px + var(--scene-y, 0px)),
+      0) scale(1.03);
+  }
+  .h-track {
+    position: static; display: block; overflow: visible; scroll-snap-type: none; height: auto;
+  }
+  .panel { flex: none; width: auto; height: auto; min-height: 92vh; overflow: visible; }
+
+  /* The scene is one shared backdrop here, but the scrims are per panel, so P1
+     ended near black and P2 restarted bright: a hard seam at the handoff. P1
+     keeps the bottom-up ramp for the hero copy and P2 continues flat at the value
+     P1 ends on, so the darkening reads as one gradient across both. */
+  /* Barely there over the art's own top half, then it takes over from the black
+     the image fades into, so P1 ends solid and P2 continues at the same value. */
+  .panel-scrim.scrim--left {
+    background: linear-gradient(180deg,
+      rgba(14,12,10,0) 0%,
+      rgba(14,12,10,0.10) 34%,
+      rgba(14,12,10,0.55) 52%,
+      rgba(14,12,10,0.88) 66%,
+      rgba(14,12,10,0.94) 100%);
+  }
+  .panel-scrim.scrim--right { background: rgba(14,12,10,0.94); }
+
+  /* The copy sits over the brightest part of the art (sky and the panda's white
+     face), so the scrim alone was carrying it. A tight shadow holds the edges
+     without the copy reading as embossed. */
+  .hero-content .eyebrow,
+  .hero-content h1,
+  .hero-content .lede,
+  .hero-bullets li { text-shadow: 0 1px 3px rgba(8,7,5,0.55); }
+  .hero-content .lede { color: #E4E1DA; }
+  /* The art owns the top of the screen and the copy sits in its black lower half,
+     so the block is bottom-anchored. The bottom padding clears the scroll cue and
+     the sticky call bar under it. */
+  /* The hero ends where the sticky call bar begins, so the art, the copy and the
+     cue share exactly one screen and nothing is hidden behind the bar. */
+  .hero-inner {
+    justify-content: flex-start; align-items: flex-end;
+    /* The call bar only shows up past the hero now, so the first screen is the
+       hero's alone: the cue sits just clear of the bottom edge and the copy
+       follows it down. */
+    padding-top: 24px; padding-bottom: calc(26px + env(safe-area-inset-bottom));
+    min-height: calc(100dvh - var(--utility-h) - var(--header-h));
+  }
+
+  /* P2 content simply centres over the backdrop and stacks its cards. */
+  /* The hero is exactly one screen tall here, so its panel does not also need the
+     generic 92vh floor: that floor was adding a strip of nothing under the scroll
+     cue before P2 even started. */
+  .panel--hero { min-height: 0; }
+  .compare-inner {
+    justify-content: center; align-items: center; min-height: 92vh;
+    padding: 32px clamp(20px, 6vw, 40px) 56px;
+  }
+  .compare-content { max-width: 640px; }
+  .scroll-next { align-self: center; }
+
+  /* P3 stacks: before/after above the pillars/questions, all full width. */
+  .pledge-inner { justify-content: flex-start; min-height: 92vh; padding: 56px clamp(20px, 6vw, 40px); }
+  .cond-grid { grid-template-columns: 1fr 1fr; }
+  .pledge-grid { grid-template-columns: 1fr 1fr; }
+  /* No horizontal lock on mobile — everything is a normal vertical stack. */
+  html.h-locked, html.h-locked body { overflow: visible; height: auto; }
+  .compare-grid { grid-template-columns: repeat(2, 1fr); }
+}
+/* In-between widths (horizontal still on but the content area is narrower). */
+@media (min-width: 901px) and (max-width: 1180px) {
+  .compare-grid { grid-template-columns: repeat(2, 1fr); }
+  .compare-content { max-width: 560px; }
+}
+@media (max-width: 520px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  /* the hero carries a big Call button, so the header stays logo only there */
+  .header-phone { display: none; }
+}
+
+@media (max-width: 900px) {
+  /* Seven stacked rows ran the copy 600px down the hero, straight over the panda.
+     The three protection claims are too long to pair up, so they keep a full row
+     each and the four short service names fall into a 2x2 underneath: five rows
+     instead of seven, and the art gets its lower half back. */
+  .hero-bullets {
+    grid-auto-flow: row; grid-template-rows: none;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 14px; row-gap: 9px;
+  }
+  .hero-bullets li:nth-child(-n+3) { grid-column: 1 / -1; }
+  .hero-bullets li { font-size: 14px; }
+  .hero-bullets b { font-size: 15px; }
+}
+@media (max-width: 620px) {
+  /* Half a phone width leaves the card copy at three words a line. */
+  .cond-grid { grid-template-columns: minmax(0, 1fr); }
+  .cond-media { height: 170px; }
+}
+
+/* ============================================================
+   MOBILE POLISH
+   Layout-only fixes for phones. Deliberately separate from the "degrade to
+   vertical" block above, which also fires for prefers-reduced-motion on desktop.
+   ============================================================ */
+@media (max-width: 900px) {
+  /* One row that scrolls past, instead of the 2x2 block: four stacked or wrapped
+     badges ate a fifth of the fold before any content. */
+  .utility-bar { padding: 7px 0; overflow: hidden; }
+  .util-track {
+    display: flex; width: max-content;
+    animation: util-marquee 24s linear infinite;
+  }
+  .utility-bar .util-clone { display: flex; }
+  .utility-bar ul {
+    display: flex; flex-wrap: nowrap;
+    width: max-content; max-width: none;
+    margin: 0; padding: 0 22px 0 0;   /* the trailing gap is the marquee's seam */
+    gap: 0 22px; justify-content: flex-start;
+  }
+  .utility-bar li { font-size: 11px; gap: 6px; white-space: nowrap; }
+  .utility-bar .icon { width: 13px; height: 13px; }
+}
+
+@media (max-width: 900px) {
+
+  /* Footer links and phone were 15px / 31px tall; pad them to a real tap target. */
+  .footer-links { gap: 2px 18px; }
+  .footer-links a { display: inline-block; padding: 12px 0; }
+  .footer-phone { padding: 6px 0; }
+}
+
+
+
+@media (max-width: 520px) {
+  /* Two columns squeezed the four quality cards into 6-line paragraphs. */
+  .pledge-grid { grid-template-columns: 1fr; }
+}
+
+/* ---- Mobile sticky quick-action bar ---- */
+.sticky-bar { display: none; }
+@media (max-width: 900px) {
+  /* Held back until the reader reaches the second section: on the first screen the
+     hero is a full-bleed image with its own scroll cue, and a bar across the
+     bottom cut into it. */
+  body.past-hero .sticky-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+    display: flex; gap: 8px; padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    background: var(--card-white); border-top: 1.5px solid var(--text-dark);
+  }
+  .sticky-bar .btn { flex: 1; font-size: 13px; padding: 12px 10px; min-height: 46px; }
+  /* Reserve the fixed bar plus a small gap so the footer's last line clears it. */
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+}
+
+/* ---- Mobile: the hero's request CTA moves up into the header ----
+   The header is the only chrome that stays in view, so the primary action lives
+   there from the first frame instead of waiting for the past-hero reveal, and the
+   hero keeps just the phone call. */
+@media (max-width: 900px) {
+  /* Both hero CTAs are gone on mobile: the request button moved to the header and
+     the call button to the sticky bar, so the hero is copy only. */
+  .hero-ctas { display: none; }
+  /* The bullets are gone from the mobile hero too: the fold is the art plus the
+     headline, and five more rows pushed the scroll cue off the screen. */
+  .hero-bullets { display: none; }
+
+  /* Scroll cue: a double chevron under the copy, centred, with the two arrows
+     staggered so the pair reads as one downward pulse. */
+  /* A block button fills the column and leaves its glyph on the left, so it is
+     sized to its content and centred with auto margins. */
+  .hero-scroll {
+    display: block; width: fit-content; margin-inline: auto;
+    margin-top: clamp(10px, 2vh, 18px);
+    background: none; border: none; padding: 6px 22px; cursor: pointer;
+    color: var(--yellow);
+  }
+  .hero-scroll__chevrons { display: block; position: relative; width: 46px; height: 40px; }
+  .hero-scroll__chevrons svg { position: absolute; left: 0; width: 46px; height: 29px; }
+  .hero-scroll__chevrons svg:first-child { top: 0; animation: hero-chevron 1.6s var(--ease-mech) infinite; }
+  .hero-scroll__chevrons svg:last-child { top: 12px; animation: hero-chevron 1.6s var(--ease-mech) 0.14s infinite; }
+  /* The header now carries the only request CTA; the phone block was a second,
+     competing call to action in 375px of chrome. */
+  .header-phone { display: none; }
+  .header-inner { justify-content: space-between; }
+  .header-cta,
+  body.past-hero .header-cta {
+    max-width: 280px; margin-left: 0; padding-left: 14px; padding-right: 14px;
+    opacity: 1; pointer-events: auto; transform: none;
+    font-size: 12px; white-space: nowrap;
+  }
+}
+
+/* ============================================================
+   P2 · CARD SWAP (desktop only)
+   Vanilla port of the React Bits <CardSwap>. The six cards become a skewed 3D
+   stack pinned into the bottom-right corner, overflowing both edges the way the
+   reference does. Progressive enhancement: these rules only bite once JS adds the
+   classes, so without JS, on mobile, or under reduced motion the cards stay the
+   plain readable grid.
+   ============================================================ */
+@media (min-width: 901px) {
+  /* The stack overhangs the panel on purpose. Clip it, or the panel turns into a
+     nested scroller that fights the track's snap navigation. */
+  .panel--compare.has-swap { overflow: hidden; }
+
+  /* Copy stays in its original right-hand column, clear of the panda. It moves to
+     the top so the stack owns the lower right instead of colliding with it. */
+  .panel--compare.has-swap .compare-inner { align-items: flex-start; }
+  .compare-content.has-swap {
+    max-width: 520px;
+    padding-top: clamp(24px, 6vh, 70px);
+  }
+
+  /* Anchored to the bottom-right and pushed past it, mirroring the original's
+     translate(5%, 20%) off its bottom-right origin. */
+  .compare-grid.card-swap {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: block;
+    width: clamp(490px, 40vw, 640px);
+    height: clamp(390px, 54vh, 540px);
+    perspective: 1200px;
+    transform: translate(11%, 36%);
+    transform-origin: bottom right;
+    overflow: visible;
+  }
+  .compare-grid.card-swap .compare-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    /* JS writes the slot as custom properties and the transform is applied here,
+       inside the breakpoint, so the media query stays authoritative: below 901px
+       the cards simply render flat, whatever the script left behind. */
+    transform: var(--slot-t, none);
+    z-index: var(--slot-z, auto);
+    /* The card is cropped by the panel edge on purpose, but ours carry real copy,
+       not the reference's empty placeholders. Keep the text out of the cropped
+       band so nothing meaningful is cut off. */
+    will-change: transform;
+    backface-visibility: hidden;
+    transition: transform 1500ms var(--ease-elastic);
+    filter: drop-shadow(0 26px 45px rgba(0,0,0,0.55));
+  }
+  .compare-grid.card-swap .card-panel {
+    /* The card is cropped by the panel edge on purpose, but ours carry real copy,
+       not the reference's empty placeholders. Keep the text out of the cropped
+       band so nothing meaningful is cut off. */
+    padding: clamp(24px, 2.2vw, 34px);
+    /* Pushed further into the corner, so the copy needs a wider guard band to
+       stay out of the cropped edge. */
+    padding-right: clamp(120px, 24%, 190px);
+    border-radius: 0 16px 16px 16px;
+  }
+
+  /* The stack cards are ~500px wide, so the grid's type scale reads tiny on them. */
+  .compare-grid.card-swap .card-tab {
+    font-size: clamp(14px, 1.15vw, 18px); gap: 10px;
+    padding: 13px 20px 11px; border-radius: 16px 16px 0 0;
+  }
+  /* The tab is the only part of a back card you can reach, so it is the click
+     target that promotes it — clicking is the instinct, and without it people
+     rage-click a stack that only answers to the wheel. */
+  /* The card box is wider than its tab, so its empty top-right corner would sit
+     on top of the tabs behind it and swallow their clicks. Only the painted parts
+     take the pointer. */
+  .compare-grid.card-swap .compare-card { pointer-events: none; }
+  .compare-grid.card-swap .card-tab,
+  .compare-grid.card-swap .card-panel { pointer-events: auto; }
+  .compare-grid.card-swap .card-tab { cursor: pointer; }
+  .compare-grid.card-swap .compare-card.is-front .card-tab { cursor: default; }
+  /* Hovering a back card lifts it out of the stack so the target is obvious. The
+     lift is prepended, so it happens in the grid's space, before the slot skew. */
+  .compare-grid.card-swap .compare-card:not(.is-front):hover {
+    transform: translateY(-16px) var(--slot-t);
+    transition: transform 300ms var(--ease-mech);
+  }
+  .compare-grid.card-swap .card-tab .icon { width: 20px; height: 20px; }
+  .compare-grid.card-swap .card-q {
+    font-size: clamp(16px, 1.25vw, 20px); line-height: 1.45;
+  }
+  .compare-grid.card-swap .card-a {
+    font-size: clamp(14px, 1.05vw, 17px); line-height: 1.45;
+    margin-top: clamp(14px, 1.8vh, 22px); padding-top: clamp(12px, 1.6vh, 18px);
+  }
+  .compare-grid.card-swap .card-a .icon { width: 19px; height: 19px; margin-top: 2px; }
+}

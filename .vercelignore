@@ -1,0 +1,3 @@
+# Build-time only: regenerates legal/*.html from saved copies of the live pages.
+# Needs jsdom + the saved HTML, neither of which exists on the deploy.
+tools/

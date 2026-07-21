@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+*.log
+.vercel
+node_modules/
+
+# Never commit secrets or local overrides
+.env
+.env.*
+*.local
+*.pem
+*.key
