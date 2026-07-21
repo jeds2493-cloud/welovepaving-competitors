@@ -399,34 +399,6 @@ html { scroll-snap-type: y proximity; }
 }
 .card-a .icon { flex: none; width: 15px; height: 15px; margin-top: 1px; color: var(--yellow); }
 
-/* "Keep scrolling" cue replacing the old CTA — nudges the user on to the next
-   panel (why WLP wins) instead of asking them to act yet. */
-.scroll-next {
-  margin-top: clamp(16px, 2.6vh, 24px);
-  display: inline-flex; align-items: center; gap: 16px;
-  background: none; border: none; padding: 6px 2px; cursor: pointer;
-  text-align: left; font-family: inherit;
-  align-self: center;
-}
-.scroll-next__text { display: flex; flex-direction: column; gap: 2px; }
-.scroll-next__text b {
-  font-family: var(--font-display); font-weight: 800; font-size: 15px;
-  text-transform: uppercase; letter-spacing: 0.01em; color: #fff;
-}
-.scroll-next__text span { font-size: 13.5px; line-height: 1.4; color: #C8C5BD; }
-.scroll-next__arrow {
-  flex: none; width: 44px; height: 44px; border-radius: 50%;
-  border: 1.5px solid rgba(242,194,48,0.5);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--yellow); font-size: 20px;
-  animation: nudge-y 1.5s var(--ease-mech) infinite;
-  transition: background 0.2s var(--ease-mech), border-color 0.2s var(--ease-mech), color 0.2s var(--ease-mech);
-}
-.scroll-next:hover .scroll-next__arrow {
-  background: var(--yellow); color: var(--text-dark); border-color: var(--yellow);
-  animation-play-state: paused;
-}
-@keyframes nudge-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
 @keyframes hero-chevron {
   0%, 100% { transform: translateY(0); opacity: 0.45; }
   40%      { transform: translateY(6px); opacity: 1; }
@@ -434,23 +406,14 @@ html { scroll-snap-type: y proximity; }
 @media (prefers-reduced-motion: reduce) {
   .hero-scroll__chevrons svg { animation: none; opacity: 1; }
 }
-@media (prefers-reduced-motion: reduce) { .scroll-next__arrow { animation: none; } }
 
 /* ============ P3 · THE QUALITY OF OUR WORK ============
    Transparent: the shared backdrop behind it supplies the asphalt and the veil. */
 .panel--pledge { background: transparent; overflow: hidden; }
-/* The cue sits centred at the very bottom of the section and points down,
-   because from here the page hands off to the vertical section. */
 @media (min-width: 901px) {
-  .panel--pledge .scroll-next {
-    position: absolute; z-index: 3;
-    left: 50%; bottom: clamp(10px, 2vh, 22px);
-    transform: translateX(-50%); margin-top: 0;
-  }
-  /* Anchored to the top, not centred: with justify-content: center the free
-     space is split evenly and the bottom padding stops reserving room, so the
-     pillars ran into the scroll cue. */
-  .panel--pledge .pledge-inner { justify-content: flex-start; padding-bottom: clamp(96px, 13vh, 140px); }
+  /* Anchored to the top, not centred: with justify-content: center the free space
+     is split evenly and the bottom padding stops reserving room. */
+  .panel--pledge .pledge-inner { justify-content: flex-start; padding-bottom: clamp(56px, 8vh, 88px); }
   /* P3 is a fixed-height panel: the head, the four service cards, the four
      pillars and the scroll cue all have to land inside one viewport, so the
      spacing here is tighter than the same component gets on a scrolling page. */
@@ -950,7 +913,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 
   .compare-inner { padding: 32px clamp(20px, 6vw, 40px) 56px; }
   .compare-content { max-width: 640px; }
-  .scroll-next { align-self: center; }
   .pledge-inner { padding: 56px clamp(20px, 6vw, 40px); }
   .cond-grid { grid-template-columns: 1fr 1fr; }
   .pledge-grid { grid-template-columns: 1fr 1fr; }
