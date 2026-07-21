@@ -198,13 +198,13 @@ body.past-hero .header-cta {
 .panel-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 /* The art fades to black at its own bottom, so the scrim only has to take over
    from there and hold the copy. */
+/* Weighted to the left, where the copy is, so it never darkens the panda or the
+   toppled competitors on the right. The radial keeps the middle open; the linear
+   ramps from nothing on the right to near solid behind the text. */
 .scrim--left {
-  background: linear-gradient(180deg,
-    rgba(14,12,10,0) 0%,
-    rgba(14,12,10,0.10) 34%,
-    rgba(14,12,10,0.55) 52%,
-    rgba(14,12,10,0.88) 66%,
-    rgba(14,12,10,0.94) 100%);
+  background:
+    radial-gradient(90% 120% at 74% 55%, rgba(14,12,10,0) 0%, rgba(14,12,10,0.28) 62%, rgba(14,12,10,0.6) 100%),
+    linear-gradient(270deg, rgba(14,12,10,0.04) 0%, rgba(14,12,10,0.10) 34%, rgba(14,12,10,0.50) 50%, rgba(14,12,10,0.93) 62%, rgba(14,12,10,0.98) 78%);
 }
 /* P2 carries its own solid background now; nothing shows through. */
 .scrim--right { display: none; }
@@ -878,6 +878,17 @@ html.svc-open, html.svc-open body { overflow: hidden; }
       var(--px, 0px),
       calc(var(--py, 0px) + var(--scene-y, 0px)),
       0) translateY(-8%) scale(1.02);
+  }
+
+  /* Stacked, the copy sits under the art rather than beside it, so the scrim runs
+     top to bottom here instead of left to right. */
+  .panel-scrim.scrim--left {
+    background: linear-gradient(180deg,
+      rgba(14,12,10,0) 0%,
+      rgba(14,12,10,0.10) 34%,
+      rgba(14,12,10,0.55) 52%,
+      rgba(14,12,10,0.88) 66%,
+      rgba(14,12,10,0.94) 100%);
   }
 
   /* The copy sits over the brightest part of the art, so the scrim alone was
