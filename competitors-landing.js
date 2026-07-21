@@ -267,39 +267,6 @@ if (stage && fineMQ.matches && !reducedMQ.matches) {
   });
 }
 
-/* ---------- Border glow on the P2 comparison cards ----------
-   Same effect as the other landings' Panda Pledge cards (React Bits <BorderGlow>):
-   pointer proximity to the nearest edge + angle around the card centre drive the
-   CSS glow layers. .edge-light (the outer glow) is injected here, so with JS off
-   or on touch the cards stay plain. */
-if (fineMQ.matches && !reducedMQ.matches) {
-  document.querySelectorAll('.glow-card').forEach((card) => {
-    if (!card.querySelector('.edge-light')) {
-      const layer = document.createElement('span');
-      layer.className = 'edge-light';
-      layer.setAttribute('aria-hidden', 'true');
-      card.prepend(layer);
-    }
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect();
-      const cx = r.width / 2, cy = r.height / 2;
-      const dx = (e.clientX - r.left) - cx;
-      const dy = (e.clientY - r.top) - cy;
-      // Edge proximity: 0 at centre, 1 at the nearest edge.
-      const kx = dx !== 0 ? cx / Math.abs(dx) : Infinity;
-      const ky = dy !== 0 ? cy / Math.abs(dy) : Infinity;
-      const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
-      let deg = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-      if (deg < 0) deg += 360;
-      card.style.setProperty('--edge-proximity', (edge * 100).toFixed(2));
-      card.style.setProperty('--cursor-angle', deg.toFixed(2) + 'deg');
-    });
-    card.addEventListener('pointerleave', () => {
-      card.style.setProperty('--edge-proximity', '0');
-    });
-  });
-}
-
 /* ---------- Service card -> morphing request modal ----------
    The card is the origin of a FLIP: measure it, open the panel, then play the
    panel from the card's rect to its own. The page has exactly one lead form, so

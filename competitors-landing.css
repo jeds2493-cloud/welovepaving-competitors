@@ -101,10 +101,6 @@ a { color: inherit; text-decoration: none; }
 .btn-primary:active { transform: scale(0.97); }
 .btn-outline { background: transparent; color: var(--card-white); border: 1.5px solid rgba(255,255,255,0.55); }
 .btn-outline:hover { border-color: var(--yellow); color: var(--yellow); }
-.btn-dark { background: var(--bg-dark-2); color: var(--card-white); }
-.btn-dark:hover { background: #000; color: var(--card-white); }
-.btn-outline-dark { background: transparent; color: var(--text-dark); border: 1.5px solid rgba(20,18,14,0.32); }
-.btn-outline-dark:hover { border-color: var(--text-dark); background: var(--text-dark); color: var(--card-white); }
 .btn-sm { padding: 10px 18px; font-size: 14px; min-height: 44px; }
 
 /* ============ UTILITY BAR ============ */
@@ -230,9 +226,14 @@ body.past-hero .header-cta {
   position: absolute; left: 0; right: 0;
   top: var(--sections-top, 100vh); bottom: 0;
   z-index: -1; pointer-events: none;
+  /* The texture is not requested until the reader leaves the hero: it is 160KiB
+     of decoration a screen below the fold, and on a throttled phone it was
+     competing with the hero image for bandwidth while the hero was still the
+     thing being looked at. Until then this is the gradients over black, which is
+     what the top of the art is anyway. */
   background:
     /* Starts on exactly the colour the hero fades out to and dissolves the
-       texture in over 240px, so the handoff is a fade rather than a line where
+       texture in over 440px, so the handoff is a fade rather than a line where
        one background stops and another starts. */
     linear-gradient(180deg,
       var(--bg-dark) 0px,
@@ -246,8 +247,24 @@ body.past-hero .header-cta {
       rgba(14,12,10,0.78) 26%,
       rgba(14,12,10,0.88) 58%,
       #0E0C0A 88%),
-    url("images/pledge-bg.webp") center top / 100% auto no-repeat,
     #000;
+}
+body.past-hero .page-bg {
+  background-image:
+    linear-gradient(180deg,
+      var(--bg-dark) 0px,
+      rgba(20,18,14,0.86) 120px,
+      rgba(20,18,14,0.45) 280px,
+      rgba(20,18,14,0) 440px),
+    linear-gradient(180deg,
+      rgba(14,12,10,0.62) 0%,
+      rgba(14,12,10,0.78) 26%,
+      rgba(14,12,10,0.88) 58%,
+      #0E0C0A 88%),
+    url("images/pledge-bg.webp");
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: center top, center top, center top;
+  background-size: auto, auto, 100% auto;
 }
 
 /* ============ CHROME PINNED TO THE TOP ============
@@ -737,135 +754,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     padding: calc(16px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));
   }
   .svc-modal__close { top: calc(10px + env(safe-area-inset-top)); right: 12px; }
-}
-
-/* ============ BORDER GLOW on the P2 cards ============
-   Vanilla port of React Bits <BorderGlow> (same as the Panda Pledge cards on the
-   other landings), recoloured to WLP gold. Pointer proximity to the nearest edge
-   drives --edge-proximity + --cursor-angle (set in JS); a gradient ring (::before),
-   a soft interior fill (::after) and an outer glow (.edge-light) fade in near an
-   edge. Desktop pointer only; .edge-light is injected by JS, so with JS off the
-   cards stay plain. */
-@media (hover: hover) and (pointer: fine) {
-  .glow-card {
-    --edge-proximity: 0;
-    --cursor-angle: 45deg;
-    --edge-sensitivity: 30;
-    --color-sensitivity: calc(var(--edge-sensitivity) + 20);
-    --glow-padding: 26px;
-    --cone-spread: 25;
-    --fill-opacity: 0.5;
-    --card-bg: var(--bg-dark-2);
-
-    --glow-color:    hsl(45deg 90% 62% / 100%);
-    --glow-color-60: hsl(45deg 90% 62% / 60%);
-    --glow-color-50: hsl(45deg 90% 62% / 50%);
-    --glow-color-40: hsl(45deg 90% 62% / 40%);
-    --glow-color-30: hsl(45deg 90% 62% / 30%);
-    --glow-color-20: hsl(45deg 90% 62% / 20%);
-    --glow-color-10: hsl(45deg 90% 62% / 10%);
-
-    --gradient-one:   radial-gradient(at 80% 55%, #F2C230 0px, transparent 50%);
-    --gradient-two:   radial-gradient(at 69% 34%, #FFE9A8 0px, transparent 50%);
-    --gradient-three: radial-gradient(at 8% 6%,   #B8860B 0px, transparent 50%);
-    --gradient-four:  radial-gradient(at 41% 38%, #F2C230 0px, transparent 50%);
-    --gradient-five:  radial-gradient(at 86% 85%, #FFE9A8 0px, transparent 50%);
-    --gradient-six:   radial-gradient(at 82% 18%, #B8860B 0px, transparent 50%);
-    --gradient-seven: radial-gradient(at 51% 4%,  #FFE9A8 0px, transparent 50%);
-
-    position: relative;
-    isolation: isolate;
-    overflow: visible;
-    border: 1px solid rgb(255 255 255 / 12%);
-  }
-  .glow-card::before,
-  .glow-card::after,
-  .glow-card > .edge-light {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    transition: opacity 0.25s ease-out;
-    z-index: -1;
-    pointer-events: none;
-  }
-  .glow-card:not(:hover)::before,
-  .glow-card:not(:hover)::after,
-  .glow-card:not(:hover) > .edge-light {
-    opacity: 0;
-    transition: opacity 0.6s ease-in-out;
-  }
-  /* gradient ring */
-  .glow-card::before {
-    border: 1px solid transparent;
-    background:
-      linear-gradient(var(--card-bg) 0 100%) padding-box,
-      linear-gradient(rgb(255 255 255 / 0%) 0 100%) border-box,
-      var(--gradient-one) border-box,
-      var(--gradient-two) border-box,
-      var(--gradient-three) border-box,
-      var(--gradient-four) border-box,
-      var(--gradient-five) border-box,
-      var(--gradient-six) border-box,
-      var(--gradient-seven) border-box;
-    opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
-    mask-image: conic-gradient(
-      from var(--cursor-angle) at center,
-      black calc(var(--cone-spread) * 1%),
-      transparent calc((var(--cone-spread) + 15) * 1%),
-      transparent calc((100 - var(--cone-spread) - 15) * 1%),
-      black calc((100 - var(--cone-spread)) * 1%));
-  }
-  /* soft interior fill near the edges */
-  .glow-card::after {
-    border: 1px solid transparent;
-    background:
-      var(--gradient-one) padding-box,
-      var(--gradient-two) padding-box,
-      var(--gradient-three) padding-box,
-      var(--gradient-four) padding-box,
-      var(--gradient-five) padding-box,
-      var(--gradient-six) padding-box,
-      var(--gradient-seven) padding-box;
-    mask-image:
-      linear-gradient(to bottom, black, black),
-      radial-gradient(ellipse at 50% 50%, black 40%, transparent 65%),
-      conic-gradient(from var(--cursor-angle) at center, transparent 5%, black 15%, black 85%, transparent 95%);
-    mask-composite: subtract, add;
-    opacity: calc(var(--fill-opacity) * (var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
-    mix-blend-mode: soft-light;
-  }
-  /* outer glow */
-  .glow-card > .edge-light {
-    inset: calc(var(--glow-padding) * -1);
-    z-index: 1;
-    mask-image: conic-gradient(
-      from var(--cursor-angle) at center, black 2.5%, transparent 10%, transparent 90%, black 97.5%);
-    opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
-    mix-blend-mode: plus-lighter;
-  }
-  .glow-card > .edge-light::before {
-    content: "";
-    position: absolute;
-    inset: var(--glow-padding);
-    border-radius: inherit;
-    box-shadow:
-      inset 0 0 0 1px var(--glow-color),
-      inset 0 0 3px 0 var(--glow-color-50),
-      inset 0 0 6px 0 var(--glow-color-40),
-      inset 0 0 15px 0 var(--glow-color-30),
-      inset 0 0 25px 2px var(--glow-color-20),
-      inset 0 0 50px 2px var(--glow-color-10),
-      0 0 3px 0 var(--glow-color-50),
-      0 0 6px 0 var(--glow-color-40),
-      0 0 15px 0 var(--glow-color-30),
-      0 0 25px 2px var(--glow-color-20),
-      0 0 50px 2px var(--glow-color-10);
-  }
-  .glow-card > :not(.edge-light) { position: relative; z-index: 2; }
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
-  .glow-card::before, .glow-card::after, .glow-card > .edge-light { display: none; }
 }
 
 /* ============ VERTICAL SECTIONS (below the hero zone) ============ */
