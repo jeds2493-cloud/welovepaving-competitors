@@ -850,10 +850,14 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 @media (max-width: 900px), (prefers-reduced-motion: reduce) {
   body { overflow-x: hidden; }
   .hero-zone { height: auto; display: block; }
-  .stage { position: static; flex: none; height: auto; overflow: visible; }
+  .stage { position: relative; flex: none; height: auto; overflow: visible; }
   .faq-form-grid { grid-template-columns: 1fr; }
   .footer-license { text-align: left; }
-  .scene-bg { position: fixed; inset: 0; }
+  /* Scrolls with the page instead of being pinned to the viewport. Fixed, the art
+     stayed put while the copy climbed, so the headline rode over the characters
+     within ~125px of scroll no matter how the image was framed. In flow, the
+     spacing the layout gives them holds all the way down. */
+  .scene-bg { position: absolute; inset: 0; }
   /* The mobile art puts the whole scene in its top half and fades to black below,
      so it is the layout: the art reads clean up top and the copy sits in the
      black, with no box or overlay of its own. Anchored to the top so the panda
@@ -875,20 +879,20 @@ html.svc-open, html.svc-open body { overflow: hidden; }
      with the panda's hard hat near its top edge, and a full-viewport layer put
      that hat under the header. Once the chrome scrolls away the strip it leaves
      is covered by the layer's own dark fill and, by then, P2's flat scrim. */
-  .scene-bg {
-    top: calc(var(--utility-h) + var(--header-h));
-    background: var(--bg-dark);
-  }
-  /* Pulled up so only a sliver of sky sits above the hard hat, the way the art is
-     composed. The layer clips the overshoot, and the black the image fades into
-     rises with it, right under the copy. */
+  /* Sampled from the art's own bottom edge (#010000), so where the image ends the
+     layer carries on with no band. */
+  .scene-bg { background: #010000; }
+  /* The art is 1785x2267, far wider than a phone. Filling the viewport with it
+     would crop ~137px off each side and blow the characters up; sizing it to the
+     width instead keeps the whole scene, lands it small and high, and leaves the
+     black it fades into for the copy to sit on. */
   .scene-bg img {
-    width: 100%; object-position: 50% 0%;
+    width: 100%; height: auto; object-fit: fill;
     transform-origin: 50% 0%;
     transform: translate3d(
       var(--px, 0px),
-      calc(var(--py, 0px) - 45px + var(--scene-y, 0px)),
-      0) scale(1.03);
+      calc(var(--py, 0px) + var(--scene-y, 0px)),
+      0) scale(1.02);
   }
   .h-track {
     position: static; display: block; overflow: visible; scroll-snap-type: none; height: auto;

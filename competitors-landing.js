@@ -237,14 +237,19 @@ refreshLock();
    Drifting it up at a fraction of the scroll puts a real speed difference between
    the art and the text. It is clamped to the hero's height so the image settles
    instead of creeping through the rest of the page. */
-const SCENE_PARALLAX = 0.32;
+const SCENE_PARALLAX = 0.18;
+/* The art now scrolls with the page, so this is a nudge on top of that rather
+   than the whole movement: it only ever eats part of the gap the layout leaves
+   between the characters and the headline, never all of it. */
+const SCENE_MAX = 40;
 if (sceneImg && heroPanel) {
   let sceneRaf = 0;
   const paintSceneY = () => {
     if (isHorizontal()) { sceneImg.style.removeProperty('--scene-y'); return; }
     const limit = heroPanel.offsetHeight;
     const y = Math.min(Math.max(window.scrollY, 0), limit);
-    sceneImg.style.setProperty('--scene-y', (-y * SCENE_PARALLAX).toFixed(1) + 'px');
+    const drift = Math.min(y * SCENE_PARALLAX, SCENE_MAX);
+    sceneImg.style.setProperty('--scene-y', (-drift).toFixed(1) + 'px');
   };
   window.addEventListener('scroll', () => {
     if (sceneRaf) return;
