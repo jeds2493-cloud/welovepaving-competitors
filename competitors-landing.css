@@ -918,31 +918,41 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 /* ============ DESKTOP ============ */
 @media (min-width: 901px) {
-  /* Laid out at the hero's own width. At 150% the box was 2.8:1 against a 2:1
-     source, so cover had to crop ~300px of height and something had to go: the
-     panda's head off the top, or the toppled competitors off the bottom. At 100%
-     the box is 1.9:1, narrower than the source, so the crop moves to the sides
-     and the whole scene fits top to bottom. */
-  .scene-bg img {
-    width: 100%;
+  /* Two columns: the art takes the right of the screen and the copy the left.
+     The panda sits near the middle of the source, so no amount of shifting a
+     full-width image would land him in the right-hand column — the layer itself
+     has to be the column. */
+  .scene-bg {
+    left: auto; right: 0; width: 58%;
     /* The hero's measured height, not a viewport calc: the hero grows with its
        own copy, and any shortfall showed up as a band of bare layer above P2. */
     height: var(--hero-h, calc(100svh - var(--utility-h) - var(--header-h)));
-    /* The object-fit crop is only ~100px wide, so object-position can barely move
-       the scene; the translate below does the shifting and the scale gives it the
-       overhang to shift into. */
-    object-position: 50% 50%;
-    /* Grown from the middle so the drift has cover at both edges; from a corner
-       the scale only pads the opposite side. */
-    transform-origin: 50% 50%;
-    /* Scaled up for presence and pulled left so the panda sits closer to the copy.
-       The shift stays inside the overhang the scale creates (about 165px wide),
-       with room left for the pointer drift, so no edge is ever exposed. */
-    transform: translate3d(
-      calc(var(--px, 0px) - 60px),
-      calc(var(--py, 0px) + var(--scene-y, 0px)),
-      0) scale(1.22);
+    bottom: auto;
   }
+  .scene-bg img {
+    left: 0; right: auto;
+    width: 100%; height: 100%;
+    object-position: 50% 50%;
+    /* Grown from the middle so the pointer drift has cover at both edges; from a
+       corner the scale only pads the opposite side. */
+    transform-origin: 50% 50%;
+    transform: translate3d(
+      var(--px, 0px),
+      calc(var(--py, 0px) + var(--scene-y, 0px)),
+      0) scale(1.06);
+  }
+  /* The art's left edge is a hard cut against the copy's background, so it is
+     dissolved rather than butted up. */
+  .scene-bg::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      var(--bg-dark) 0%,
+      rgba(20,18,14,0.72) 14%,
+      rgba(20,18,14,0.18) 34%,
+      rgba(20,18,14,0) 55%);
+  }
+
   /* The art's bottom edge is mid-tone asphalt and P2 starts at --bg-dark, so the
      two met as a visible line. The last stop fades the hero into P2's own colour. */
   .panel--hero .panel-scrim::after {
