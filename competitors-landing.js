@@ -594,6 +594,22 @@ if (svcModal) {
   });
 }
 
+/* ---------- P2 · card reveal (stacked layouts) ----------
+   Each card slides in from alternating sides as it reaches the viewport. The CSS
+   that does the sliding is scoped under 901px, where the cards are a plain grid;
+   above that they are the CardSwap stack and this class is inert, so there is
+   nothing to tear down when the breakpoint changes. */
+document.querySelectorAll('.compare-card').forEach((card) => {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      card.classList.add('is-in');
+      io.disconnect();
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+  io.observe(card);
+});
+
 /* ---------- P2 · card swap (desktop, motion-safe) ----------
    Vanilla port of the React Bits <CardSwap>: the front card drops out of the
    stack, the ones behind promote a slot forward, and the dropped card slides back
