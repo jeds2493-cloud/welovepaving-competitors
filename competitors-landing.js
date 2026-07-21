@@ -495,8 +495,13 @@ const RAYS = {
   opacity: 0.95,
 };
 
+/* Desktop only: on a phone the rays land on the art rather than beside the copy,
+   and a WebGL context running a rAF loop is not worth the battery for a
+   decoration nobody asked for there. Set up once — this does not need to follow
+   a resize, and tearing a live context down on one would be worse than either
+   state. */
 const raysHost = document.querySelector('[data-side-rays]');
-if (raysHost) initSideRays(raysHost, RAYS);
+if (raysHost && window.matchMedia('(min-width: 901px)').matches) initSideRays(raysHost, RAYS);
 
 function initSideRays(host, opt) {
   const canvas = document.createElement('canvas');
