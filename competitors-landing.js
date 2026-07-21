@@ -60,29 +60,25 @@ if (headerEl || utilityEl) {
 const heroPanel = document.querySelector('.panel--hero');
 const postHero = document.querySelector('.post-hero');
 const stage = document.querySelector('.stage');
-const pledgePanel = document.querySelector('.panel--pledge');
 
-/* ---------- Continue P3's asphalt into the section below ----------
-   Both use the same image at the same scale; offsetting the lower one by P3's
-   height makes the crop pick up exactly where P3's leaves off, so the backdrop
-   reads as one photo across the handoff. */
-function alignPostHeroBg() {
-  if (!postHero || !pledgePanel) return;
-  postHero.style.setProperty('--posthero-bg-y', (-Math.round(pledgePanel.offsetHeight)) + 'px');
-}
-alignPostHeroBg();
-new ResizeObserver(alignPostHeroBg).observe(pledgePanel || document.body);
+/* ---------- Publish the hero's height, and where the sections below it start ----
+   --hero-h sizes the scene art: the layer spans the whole stage, so the art cannot
+   just be `height: 100%`, and a viewport calc left a strip of bare layer whenever
+   the hero grew past it on its own copy.
 
-/* ---------- Publish the hero's real height ----------
-   The scene layer spans the whole stage, so the art cannot just be `height: 100%`
-   — that would stretch it over every section. Sizing it to a viewport calc left a
-   strip of bare layer whenever the hero grew past that calc on its content, which
-   is what the band between the hero and P2 was. */
-function publishHeroHeight() {
-  if (heroPanel) document.documentElement.style.setProperty('--hero-h', heroPanel.offsetHeight + 'px');
+   --sections-top parks the shared backdrop at the hero's bottom, so one image and
+   one veil cover the comparison, the quality section and the FAQ/form/footer with
+   no restart at either handoff. Both come from the same measurement. */
+function publishHeroMetrics() {
+  if (!heroPanel) return;
+  const h = heroPanel.offsetHeight;
+  const top = Math.round(heroPanel.getBoundingClientRect().top + window.scrollY);
+  const root = document.documentElement.style;
+  root.setProperty('--hero-h', h + 'px');
+  root.setProperty('--sections-top', (top + h) + 'px');
 }
-publishHeroHeight();
-if (heroPanel) new ResizeObserver(publishHeroHeight).observe(heroPanel);
+publishHeroMetrics();
+if (heroPanel) new ResizeObserver(publishHeroMetrics).observe(heroPanel);
 function updateChrome() {
   const past = !!heroPanel && heroPanel.getBoundingClientRect().bottom < window.innerHeight * 0.5;
   document.body.classList.toggle('past-hero', past);

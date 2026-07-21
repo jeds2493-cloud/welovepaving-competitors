@@ -50,6 +50,11 @@
 <a href="#p3-form" class="sr-only">Skip to the project review form</a>
 
 <!-- ===== HERO ZONE: chrome + the horizontal-scroll track (one viewport tall) ===== -->
+<!-- One asphalt backdrop for sections 2, 3 and 4. It is a single element behind
+     all three rather than a background on each, so the image and the veil over it
+     run unbroken across both handoffs. JS parks its top at the hero's bottom. -->
+<div class="page-bg" aria-hidden="true"></div>
+
 <div class="hero-zone">
 
 <!-- ===== UTILITY TRUST BAR ===== -->
@@ -237,7 +242,6 @@
        same scale, continuing crop set by JS) so the horizontal->vertical handoff
        into the FAQ shows one unbroken backdrop. -->
   <section class="panel panel--pledge" aria-label="The quality of our work" data-view="work_quality_view">
-    <div class="pledge-bg" aria-hidden="true"></div>
     <div class="pledge-inner">
       <header class="pledge-head">
         <h2>See the Difference <span class="hl">Real Quality Makes.</span></h2>

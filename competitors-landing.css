@@ -63,6 +63,8 @@ body {
   /* clip, not hidden: hidden computes overflow-y to auto and makes body its own
      scroll container, which throws scrollIntoView off by the scroll-margin. */
   overflow-x: clip;
+  /* the containing block for .page-bg */
+  position: relative;
 }
 
 img { max-width: 100%; display: block; }
@@ -189,6 +191,31 @@ body.past-hero .header-cta {
   transform: translate3d(var(--px, 0px), calc(var(--py, 0px) + var(--scene-y, 0px)), 0) scale(1.02);
   transform-origin: 50% 0%;
   will-change: transform;
+}
+
+/* ============ SHARED BACKDROP (sections 2-4) ============
+   One element behind the comparison, the quality section and the FAQ/form/footer
+   zone, rather than a background on each: painted three times the image restarted
+   at every boundary and the veil over it stepped. Its top is parked at the hero's
+   bottom by JS (--sections-top).
+
+   The art is 4933x12155 and fades to black, so `100% auto` scales it to the page
+   width and whatever it does not reach is the layer's own black — seamless at any
+   height, on any screen. */
+.page-bg {
+  position: absolute; left: 0; right: 0;
+  top: var(--sections-top, 100vh); bottom: 0;
+  z-index: -1; pointer-events: none;
+  background:
+    /* The veil rides on the same layer, so it spans the three sections as one
+       gradient instead of restarting with each. */
+    linear-gradient(180deg,
+      rgba(14,12,10,0.62) 0%,
+      rgba(14,12,10,0.78) 26%,
+      rgba(14,12,10,0.88) 58%,
+      #0E0C0A 88%),
+    url("images/pledge-bg.webp") center top / 100% auto no-repeat,
+    #000;
 }
 
 /* ============ CHROME PINNED TO THE TOP ============
@@ -402,10 +429,8 @@ html { scroll-snap-type: y proximity; }
 @media (prefers-reduced-motion: reduce) { .scroll-next__arrow { animation: none; } }
 
 /* ============ P3 · THE QUALITY OF OUR WORK ============
-   The asphalt background is top-aligned at the SAME 100%-width scale as the
-   post-hero background below it; JS offsets the post-hero crop by the panel height
-   (--posthero-bg-y) so the two are one continuous image across the handoff. */
-.panel--pledge { background: #0E0C0A; overflow: hidden; }
+   Transparent: the shared backdrop behind it supplies the asphalt and the veil. */
+.panel--pledge { background: transparent; overflow: hidden; }
 /* The cue sits centred at the very bottom of the section and points down,
    because from here the page hands off to the vertical section. */
 @media (min-width: 901px) {
@@ -428,20 +453,6 @@ html { scroll-snap-type: y proximity; }
   .panel--pledge .cond-card p { margin-bottom: 10px; }
   .panel--pledge .pledge-card { padding: 12px 14px; }
   .panel--pledge .pledge-card h3 { font-size: clamp(15px, 1.25vw, 17px); margin-bottom: 4px; }
-}
-.pledge-bg {
-  position: absolute; inset: 0; z-index: 0; overflow: hidden;
-  background: url("images/pledge-bg.webp") top center / 100% auto no-repeat;
-}
-.pledge-bg::after {
-  content: ""; position: absolute; inset: 0;
-  /* Two veils: the left one keeps the seam with P2 invisible, the vertical one
-     is what makes the heading and the card copy readable over the asphalt. The
-     content spans the full width here, so the whole frame needs darkening, not
-     just the left third. */
-  background:
-    linear-gradient(90deg, #0E0C0A 0%, rgba(14,12,10,0.60) 12%, rgba(14,12,10,0.16) 34%),
-    linear-gradient(180deg, rgba(14,12,10,0.86) 0%, rgba(14,12,10,0.62) 26%, rgba(14,12,10,0.52) 62%, rgba(14,12,10,0.74) 100%);
 }
 .pledge-inner {
   position: relative; z-index: 4;
@@ -794,22 +805,8 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 /* ============ VERTICAL SECTIONS (below the hero zone) ============ */
 .lp-container { max-width: 1440px; margin: 0 auto; padding: 0 clamp(24px, 5vw, 64px); }
 
-/* Everything below the hero zone shares one asphalt backdrop that continues the
-   image from P3 (which shows its top) and fades to black by the footer — so the
-   dark background flows on with no seam. */
-.post-hero { position: relative; background: #0E0C0A; isolation: isolate; }
-/* One continuous image with P3: same full-width scale, but the crop starts where
-   P3 left off (--posthero-bg-y = -panelHeight, set by JS) so the asphalt flows on
-   unbroken from P3 into this zone, fading to black. */
-.post-hero::before {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: url("images/pledge-bg.webp") center var(--posthero-bg-y, 0px) / 100% auto no-repeat;
-}
-.post-hero::after {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(180deg,
-    rgba(14,12,10,0.28) 0%, rgba(14,12,10,0.55) 30%, rgba(14,12,10,0.82) 62%, #0E0C0A 90%);
-}
+/* Transparent: the shared backdrop behind sections 2-4 shows through. */
+.post-hero { position: relative; background: transparent; }
 .lp-section, .site-footer { position: relative; z-index: 1; }
 
 /* FAQ + lead form — dark, over the shared asphalt backdrop. */
@@ -1027,7 +1024,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
      section, so the six cards read as a set instead of floating on the art. It
      matches the hero's height so the snap lands on a full screen either way. */
   .panel--compare {
-    background: var(--bg-dark);
     min-height: calc(100svh - var(--utility-h) - var(--header-h));
     /* Top-aligned, not centred: the heading sits close under the chrome and the
        cards take the rest of the screen. */
