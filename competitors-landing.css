@@ -1193,18 +1193,32 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   /* Held back until the reader reaches the second section: on the first screen the
      hero is a full-bleed image with its own scroll cue, and a bar across the
      bottom cut into it. */
-  body.past-hero .sticky-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+  /* Always in the layout so it can be animated — display cannot be transitioned.
+     It waits below the fold and slides up when the reader reaches the second
+     section; on the first screen the hero is a full-bleed image with its own
+     scroll cue and a bar across the bottom cut into it. */
+  .sticky-bar {
+    position: fixed; left: 0; right: 0; z-index: 60;
     display: flex; gap: 8px; padding: 8px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    /* The box runs 18px past the bottom edge and its padding makes that up, so
+       the bounce can overshoot without opening a gap under the bar. */
+    bottom: -18px;
+    padding-bottom: calc(26px + env(safe-area-inset-bottom));
     /* A shade lighter than the sections it sits over, so the bar separates from
        the page without a white slab, and the yellow button carries the contrast
        instead of the frame. */
     background: var(--bg-dark-2);
     border-top: 1px solid var(--border-dark);
     box-shadow: 0 -10px 28px rgba(0,0,0,0.5);
+    transform: translateY(115%);
+    pointer-events: none;
+    transition: transform 620ms var(--ease-bounce);
   }
+  body.past-hero .sticky-bar { transform: none; pointer-events: auto; }
   .sticky-bar .btn { flex: 1; font-size: 13px; padding: 12px 10px; min-height: 46px; }
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-bar { transition: none; }
+  }
   /* Reserve the fixed bar plus a small gap so the footer's last line clears it. */
   body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
 }
