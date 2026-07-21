@@ -485,9 +485,15 @@ html { scroll-snap-type: y proximity; }
   transition: transform 0.2s var(--ease-mech), box-shadow 0.2s var(--ease-mech);
 }
 /* Gated on a real pointer: on touch, :hover sticks after a tap and the card
-   would stay raised. */
+   would stay raised. Scoped through .cond-grid to outrank the reveal's
+   `.cond-card.is-in { transform: none }`, which is the same specificity and sits
+   later in the file — it was silently eating the lift. */
 @media (hover: hover) and (pointer: fine) {
-  .cond-card:hover { transform: translateY(-5px); box-shadow: 0 14px 30px rgba(0,0,0,0.45); }
+  .cond-grid .cond-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+    border-color: rgba(242,194,48,0.45);
+  }
 }
 .cond-body { padding: clamp(12px, 1.1vw, 16px) clamp(12px, 1.1vw, 16px) 0; }
 .cond-tag {
@@ -555,7 +561,10 @@ html { scroll-snap-type: y proximity; }
   .cond-card {
     opacity: 0;
     transform: translateY(34px);
-    transition: transform 600ms var(--ease-bounce), opacity 300ms var(--ease-mech);
+    /* box-shadow and border-color are in here because the hover lift changes them
+       too and this declaration replaces the component's own transition. */
+    transition: transform 600ms var(--ease-bounce), opacity 300ms var(--ease-mech),
+                box-shadow 260ms var(--ease-mech), border-color 260ms var(--ease-mech);
   }
   .cond-card.is-in { opacity: 1; transform: none; }
   .cond-card:nth-child(2) { transition-delay: 90ms; }
