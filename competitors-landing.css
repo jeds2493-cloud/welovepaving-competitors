@@ -918,18 +918,18 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 /* ============ DESKTOP ============ */
 @media (min-width: 901px) {
-  /* The art is the hero's, not the page's. Laid out at 150% so the panda lands
-     to the right of the copy and the pointer drift never runs off a side edge. */
+  /* Laid out at the hero's own width. At 150% the box was 2.8:1 against a 2:1
+     source, so cover had to crop ~300px of height and something had to go: the
+     panda's head off the top, or the toppled competitors off the bottom. At 100%
+     the box is 1.9:1, narrower than the source, so the crop moves to the sides
+     and the whole scene fits top to bottom. */
   .scene-bg img {
-    width: 150%;
+    width: 100%;
     /* The hero's measured height, not a viewport calc: the hero grows with its
        own copy, and any shortfall showed up as a band of bare layer above P2. */
     height: var(--hero-h, calc(100svh - var(--utility-h) - var(--header-h)));
-    /* Anchored to the top of the art. The source is 2:1 against a hero closer to
-       2.8:1, so the crop takes ~300px off the height: off the top it cut the
-       panda's head, off the bottom it keeps the whole figure and only loses
-       foreground asphalt. */
-    object-position: 50% 0%;
+    /* Nothing to choose vertically now — the crop is horizontal, ~48px a side. */
+    object-position: 50% 50%;
     /* Grown from the middle so the drift has cover at both edges; from a corner
        the scale only pads the opposite side. */
     transform-origin: 50% 50%;
