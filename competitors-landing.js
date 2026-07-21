@@ -189,10 +189,20 @@ if (legalModal && typeof legalModal.showModal === 'function') {
   const legalBody = document.getElementById('legalBody');
   const legalCache = new Map();
 
+  /* Built with DOM calls, not a concatenated string: the href is ours today, but
+     a template that interpolates a URL into markup is the shape of an injection
+     and there is no reason to keep one around. */
   const showFallback = (href) => {
-    legalBody.innerHTML =
-      '<p>This document could not be loaded here. ' +
-      '<a href="' + href + '" target="_blank" rel="noopener">Open it in a new tab</a>.</p>';
+    legalBody.replaceChildren();
+    const p = document.createElement('p');
+    p.append('This document could not be loaded here. ');
+    const a = document.createElement('a');
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'Open it in a new tab';
+    p.append(a, '.');
+    legalBody.append(p);
   };
 
   const render = (html) => {
@@ -218,10 +228,21 @@ if (legalModal && typeof legalModal.showModal === 'function') {
         const res = await fetch(src);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-        // Pre-flattened, but still untrusted markup as far as this page is
-        // concerned — strip anything executable before it reaches the DOM.
+        /* Pre-flattened, but still untrusted markup as far as this page is
+           concerned. Elements that can execute are removed outright; inline
+           handlers and javascript: URLs survive element-level stripping, so they
+           are taken off every remaining node too. */
         doc.body.querySelectorAll('script, style, link, iframe, form, noscript, object, embed')
           .forEach((el) => el.remove());
+        doc.body.querySelectorAll('*').forEach((el) => {
+          [...el.attributes].forEach((attr) => {
+            const name = attr.name.toLowerCase();
+            const value = attr.value.replace(/\s/g, '').toLowerCase();
+            if (name.startsWith('on') || (/^(href|src|xlink:href)$/.test(name) && value.startsWith('javascript:'))) {
+              el.removeAttribute(attr.name);
+            }
+          });
+        });
         if (!doc.body.textContent.trim()) throw new Error('empty document');
         // Guard against a stale response landing after the user moved on.
         if (legalTitle.textContent !== link.dataset.legal) return;

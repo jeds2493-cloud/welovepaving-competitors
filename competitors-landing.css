@@ -1148,3 +1148,14 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     font-size: 12px; white-space: nowrap;
   }
 }
+
+/* 320px phones (SE 1, older Androids): the logo, the gap and the header CTA do
+   not fit at the mobile padding, so the button was clipped at the right edge.
+   Last in the file on purpose — it shares specificity with the 900px header-cta
+   rule and has to win on source order. */
+@media (max-width: 360px) {
+  .header-inner { padding-left: 12px; padding-right: 12px; gap: 8px; }
+  .header-logo { height: 30px; }
+  .header-cta,
+  body.past-hero .header-cta { font-size: 10.5px; padding-left: 10px; padding-right: 10px; }
+}
