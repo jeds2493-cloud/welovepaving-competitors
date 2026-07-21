@@ -926,11 +926,21 @@ html.svc-open, html.svc-open body { overflow: hidden; }
      is the framing the art is composed for. */
   .scene-bg img {
     width: 150%;
-    height: calc(100svh - var(--utility-h) - var(--header-h));
+    /* The hero's measured height, not a viewport calc: the hero grows with its
+       own copy, and any shortfall showed up as a band of bare layer above P2. */
+    height: var(--hero-h, calc(100svh - var(--utility-h) - var(--header-h)));
     object-position: 50% 100%;
     /* Grown from the bottom edge, not the top: with a top origin the scale
        pushed the toppled competitors out of the frame. */
     transform-origin: 50% 100%;
+  }
+  /* The art's bottom edge is mid-tone asphalt and P2 starts at --bg-dark, so the
+     two met as a visible line. The last stop fades the hero into P2's own colour. */
+  .panel--hero .panel-scrim::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: clamp(60px, 9vh, 110px);
+    background: linear-gradient(180deg, rgba(20,18,14,0) 0%, var(--bg-dark) 100%);
   }
   .hero-inner {
     align-items: flex-end;

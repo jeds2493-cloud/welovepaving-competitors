@@ -72,6 +72,17 @@ function alignPostHeroBg() {
 }
 alignPostHeroBg();
 new ResizeObserver(alignPostHeroBg).observe(pledgePanel || document.body);
+
+/* ---------- Publish the hero's real height ----------
+   The scene layer spans the whole stage, so the art cannot just be `height: 100%`
+   — that would stretch it over every section. Sizing it to a viewport calc left a
+   strip of bare layer whenever the hero grew past that calc on its content, which
+   is what the band between the hero and P2 was. */
+function publishHeroHeight() {
+  if (heroPanel) document.documentElement.style.setProperty('--hero-h', heroPanel.offsetHeight + 'px');
+}
+publishHeroHeight();
+if (heroPanel) new ResizeObserver(publishHeroHeight).observe(heroPanel);
 function updateChrome() {
   const past = !!heroPanel && heroPanel.getBoundingClientRect().bottom < window.innerHeight * 0.5;
   document.body.classList.toggle('past-hero', past);
