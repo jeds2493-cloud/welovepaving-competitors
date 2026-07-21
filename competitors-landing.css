@@ -902,13 +902,12 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 74%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 0%, #000 74%, transparent 100%);
     transform-origin: 50% 0%;
-    /* The lift is of the art's own height, so it holds at any viewport. It is
-       capped at 14%: the art only carries ~64px of sky above the hard hat at
-       this scale, and past that the lift starts cutting the hat itself. */
+    /* No lift: this art already sits the whole scene in the top fifth of the
+       frame, so pulling it up any further only cuts the hard hat. */
     transform: translate3d(
       var(--px, 0px),
       calc(var(--py, 0px) + var(--scene-y, 0px)),
-      0) translateY(-14%) scale(1.02);
+      0) scale(1.02);
   }
   .h-track {
     position: static; display: block; overflow: visible; scroll-snap-type: none; height: auto;
