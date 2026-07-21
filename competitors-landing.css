@@ -885,11 +885,15 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   /* The art gets a fixed share of the screen rather than whatever its own aspect
      ratio works out to. Sized to the width it was 505px tall, which fits a 844px
      viewport but not the ~620px Chrome leaves once its toolbars are up: the copy
-     then started halfway up the characters. At 42dvh the scene always ends above
+     then started halfway up the characters. At 42svh the scene always ends above
      the copy, on any phone, and the crop lands where the art has already gone
      black so the layer's fill continues it with no seam. */
   .scene-bg img {
-    width: 100%; height: 42dvh;
+    /* svh, not dvh: dvh tracks the browser toolbars, so every time Chrome hid or
+       showed its bottom bar the hero resized and the whole page jumped. svh is
+       the viewport with the toolbars up — it never changes, so the layout holds
+       still and the extra height the collapse frees just shows more of the page. */
+    width: 100%; height: 42svh;
     object-fit: cover; object-position: 50% 0%;
     /* The crop lands on dark asphalt, not pure black, so the cut showed as a line
        against the layer's fill. Fading the last quarter of the image out lets the
@@ -913,7 +917,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
      it and the heading lands behind the header. The margin makes the scroll stop
      at the chrome's edge instead. */
   .panel {
-    flex: none; width: auto; height: auto; min-height: 92vh; overflow: visible;
+    flex: none; width: auto; height: auto; min-height: 92svh; overflow: visible;
     scroll-margin-top: calc(var(--utility-h) + var(--header-h));
   }
 
@@ -952,7 +956,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
        hero's alone: the cue sits just clear of the bottom edge and the copy
        follows it down. */
     padding-top: 24px; padding-bottom: calc(26px + env(safe-area-inset-bottom));
-    min-height: calc(100dvh - var(--utility-h) - var(--header-h));
+    min-height: calc(100svh - var(--utility-h) - var(--header-h));
   }
 
   /* P2 content simply centres over the backdrop and stacks its cards. */
@@ -961,14 +965,14 @@ html.svc-open, html.svc-open body { overflow: hidden; }
      cue before P2 even started. */
   .panel--hero { min-height: 0; }
   .compare-inner {
-    justify-content: center; align-items: center; min-height: 92vh;
+    justify-content: center; align-items: center; min-height: 92svh;
     padding: 32px clamp(20px, 6vw, 40px) 56px;
   }
   .compare-content { max-width: 640px; }
   .scroll-next { align-self: center; }
 
   /* P3 stacks: before/after above the pillars/questions, all full width. */
-  .pledge-inner { justify-content: flex-start; min-height: 92vh; padding: 56px clamp(20px, 6vw, 40px); }
+  .pledge-inner { justify-content: flex-start; min-height: 92svh; padding: 56px clamp(20px, 6vw, 40px); }
   .cond-grid { grid-template-columns: 1fr 1fr; }
   .pledge-grid { grid-template-columns: 1fr 1fr; }
   /* No horizontal lock on mobile — everything is a normal vertical stack. */
