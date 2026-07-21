@@ -9,6 +9,18 @@ const track = (event, params = {}) => window.dataLayer.push({ event, ...params }
 
 const reducedMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+/* ---------- Last input modality ----------
+   Whether the reader is driving with a keyboard or a pointer. Dialogs need it to
+   decide where focus goes on close: putting it back on the trigger is how a
+   keyboard user keeps their place, but after a click it just leaves a ring on a
+   button nobody focused. Reading `:focus-visible` at the moment of the click is
+   not enough — a script-driven focus does not match it. */
+let usingKeyboard = false;
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ' || e.key.startsWith('Arrow')) usingKeyboard = true;
+}, true);
+window.addEventListener('pointerdown', () => { usingKeyboard = false; }, true);
+
 /* ---------- Utility-bar marquee (mobile) ----------
    The four badges do not fit one phone-width row, so on mobile the bar scrolls
    them past instead of wrapping to a 2x2 block. Duplicating the list gives the
@@ -305,6 +317,7 @@ if (svcModal) {
      not reflow and the scroll position does not jump when it comes back. */
   const slot = document.createElement('div');
   let lastFocus = null;
+  let openedByKeyboard = false;
   let originCard = null;   // the card the panel morphed out of, so it morphs back into it
   let busy = false;
 
@@ -352,6 +365,7 @@ if (svcModal) {
     if (busy || !leadCard) return;
     busy = true;
     lastFocus = trigger;
+    openedByKeyboard = usingKeyboard;
     /* A service card morphs from the whole card; a plain CTA morphs from the
        button itself, which is the thing the user actually pressed. */
     originCard = trigger.closest('.cond-card') || trigger;
@@ -401,7 +415,12 @@ if (svcModal) {
       panel.getAnimations().forEach((a) => a.cancel());
       contents.forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
       scrim.getAnimations().forEach((a) => a.cancel());
-      if (lastFocus && lastFocus.isConnected) lastFocus.focus();
+      if (openedByKeyboard && lastFocus && lastFocus.isConnected) {
+        lastFocus.focus({ preventScroll: true });
+      } else if (document.activeElement && svcModal.contains(document.activeElement)) {
+        // The panel is about to be hidden; do not leave focus inside it.
+        document.activeElement.blur();
+      }
       busy = false;
     };
     if (anim) anim.finished.then(finish).catch(finish);

@@ -72,6 +72,10 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02e
 p { margin: 0; }
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+/* Belt and braces: a ring only ever for keyboard focus. Some browsers still paint
+   the default outline when focus is moved by script, which is exactly what
+   closing a dialog does. */
+:focus:not(:focus-visible) { outline: none; }
 
 .icon {
   width: 1em; height: 1em; flex: none;
