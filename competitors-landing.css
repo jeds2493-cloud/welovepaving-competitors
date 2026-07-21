@@ -1160,7 +1160,12 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
     display: flex; gap: 8px; padding: 8px;
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    background: var(--card-white); border-top: 1.5px solid var(--text-dark);
+    /* A shade lighter than the sections it sits over, so the bar separates from
+       the page without a white slab, and the yellow button carries the contrast
+       instead of the frame. */
+    background: var(--bg-dark-2);
+    border-top: 1px solid var(--border-dark);
+    box-shadow: 0 -10px 28px rgba(0,0,0,0.5);
   }
   .sticky-bar .btn { flex: 1; font-size: 13px; padding: 12px 10px; min-height: 46px; }
   /* Reserve the fixed bar plus a small gap so the footer's last line clears it. */
