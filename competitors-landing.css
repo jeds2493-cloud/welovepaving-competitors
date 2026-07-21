@@ -264,7 +264,17 @@ body.past-hero .header-cta {
    footer are taller than the viewport and mandatory would drag the reader back to
    their tops. The snap area honours scroll-margin, so a section stops below the
    fixed chrome, not under it. */
-html { scroll-snap-type: y proximity; }
+html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
+/* No snapping on touch. Proximity fights the finger: a flick that ends near a
+   boundary gets yanked the rest of the way, which reads as the page stuttering
+   rather than settling. The hero's own cue is the deliberate jump on a phone. */
+@media (max-width: 900px) {
+  html { scroll-snap-type: none; }
+}
+/* Honour the request literally: no smooth scrolling either. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 .h-track { position: relative; z-index: 1; }
 .panel {
   position: relative;
@@ -653,7 +663,13 @@ html { scroll-snap-type: y proximity; }
 /* The page scrolls on <html>, not body, so the modal's scroll lock goes on the
    same element. */
 html.svc-open, html.svc-open body { overflow: hidden; }
-.svc-modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; }
+.svc-modal {
+  position: fixed; inset: 0; z-index: 200;
+  display: grid; place-items: center;
+  /* The padding is what bounds the panel: it can then be `max-height: 100%` of
+     the space that is left, which needs no viewport maths and cannot be wrong. */
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));
+}
 .svc-modal[hidden] { display: none; }
 /* A vignette rather than a flat wash: lighter behind the panel, darker at the
    edges, so the page reads as pushed back instead of switched off. */
@@ -668,8 +684,11 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 .svc-modal__panel {
   position: relative;
-  width: min(560px, calc(100vw - 32px));
-  max-height: min(92vh, 900px);
+  width: min(560px, 100%);
+  /* Of the padded grid area, not of the viewport: 92vh is the LARGE viewport on
+     a phone, so with the browser toolbars up the panel was taller than the
+     screen and spilled off both ends. */
+  max-height: min(100%, 900px);
   overflow-y: auto; overscroll-behavior: contain;
   background: var(--bg-dark-2); border: 1px solid var(--border-dark);
   border-radius: 16px; box-shadow: 0 40px 90px rgba(0,0,0,0.6);
