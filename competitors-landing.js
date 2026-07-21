@@ -482,17 +482,17 @@ if (heroPanel) {
    It is a decoration, so everything about it is conditional: no WebGL, no rays;
    reduced motion, the clock never advances; off screen, the loop stops. */
 const RAYS = {
-  speed: 1.6,
+  speed: 3.4,
   color1: '#F2C230',        // WLP yellow
   color2: '#FFE9A8',        // pale gold — the original's blue fights the palette
-  intensity: 2.4,
-  spread: 1.8,
+  intensity: 2,
+  spread: 1.5,
   origin: 'top-left',
   tilt: 0,
-  saturation: 1.25,
+  saturation: 1.5,
   blend: 0.55,
-  falloff: 1.35,          // shallower than the default: a wider, softer glow
-  opacity: 0.95,
+  falloff: 2.3,
+  opacity: 0.55,
 };
 
 const raysHost = document.querySelector('[data-side-rays]');
