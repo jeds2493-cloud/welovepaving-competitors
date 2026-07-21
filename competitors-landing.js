@@ -434,6 +434,45 @@ if (svcModal) {
   });
 }
 
+/* ---------- The hero is all or nothing ----------
+   Scroll snapping is `proximity`, which is right for the rest of the page but
+   lets the hero be nudged a few pixels at a time. A wheel gesture anywhere in the
+   hero commits to the next section instead. Only the hero: below it the reader is
+   reading, and hijacking the wheel there would fight them. */
+const desktopMQ = window.matchMedia('(min-width: 901px)');
+if (heroPanel) {
+  let gateLock = false;
+  const chromeH = () => {
+    const root = getComputedStyle(document.documentElement);
+    return (parseFloat(root.getPropertyValue('--utility-h')) || 0) +
+           (parseFloat(root.getPropertyValue('--header-h')) || 0);
+  };
+  const modalIsOpen = () =>
+    document.documentElement.classList.contains('svc-open') ||
+    !!document.querySelector('dialog[open]');
+
+  window.addEventListener('wheel', (e) => {
+    if (gateLock || !desktopMQ.matches || reducedMQ.matches || modalIsOpen()) return;
+    if (e.deltaY <= 0) return;                       // downward gestures only
+    const top = chromeH();
+    const heroBottom = Math.round(heroPanel.getBoundingClientRect().bottom + window.scrollY);
+    // Anywhere in the hero, including its very last pixels.
+    if (window.scrollY >= heroBottom - top - 4) return;
+    e.preventDefault();
+    gateLock = true;
+    const target = heroBottom - top;
+    const from = window.scrollY;
+    window.scrollTo({ top: target, behavior: 'smooth' });
+    /* The gesture was swallowed, so the jump has to happen even where smooth
+       scrolling is a no-op — otherwise preventDefault would strand the reader in
+       the hero with a wheel that does nothing. */
+    setTimeout(() => {
+      if (Math.abs(window.scrollY - from) < 2) window.scrollTo({ top: target, behavior: 'auto' });
+    }, 260);
+    setTimeout(() => { gateLock = false; }, 700);
+  }, { passive: false });
+}
+
 /* ---------- P2 · card reveal ----------
    Each card slides in from alternating sides as it reaches the viewport. The
    observer disconnects on the first hit: this is an entrance, not a toggle. */

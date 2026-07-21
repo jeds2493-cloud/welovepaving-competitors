@@ -207,6 +207,14 @@ body.past-hero .header-cta {
   top: var(--sections-top, 100vh); bottom: 0;
   z-index: -1; pointer-events: none;
   background:
+    /* Starts on exactly the colour the hero fades out to and dissolves the
+       texture in over 240px, so the handoff is a fade rather than a line where
+       one background stops and another starts. */
+    linear-gradient(180deg,
+      var(--bg-dark) 0px,
+      rgba(20,18,14,0.86) 120px,
+      rgba(20,18,14,0.45) 280px,
+      rgba(20,18,14,0) 440px),
     /* The veil rides on the same layer, so it spans the three sections as one
        gradient instead of restarting with each. */
     linear-gradient(180deg,
