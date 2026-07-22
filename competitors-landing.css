@@ -461,6 +461,18 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
   font-size: 12.5px; line-height: 1.4; font-weight: 600; color: #fff;
 }
 .card-a .icon { flex: none; width: 15px; height: 15px; margin-top: 1px; color: var(--yellow); }
+/* The differentiator inside the answer — ties the card straight back to the hero
+   promise so the 15-year term does not get lost among the other arguments. */
+.card-hl { color: var(--yellow); font-weight: 800; }
+
+/* The Written Warranty card is the one that matters most, so it carries the gold
+   edge and a soft glow instead of the flat border the rest share. Its tab is the
+   brightest thing in the grid already; this lifts the whole card to match. */
+.compare-card.is-key .card-panel {
+  border-color: rgba(242,194,48,0.55);
+  box-shadow: 0 0 0 1px rgba(242,194,48,0.35), 0 14px 34px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, rgba(242,194,48,0.06), rgba(27,24,19,0) 46%), var(--bg-dark-2);
+}
 
 @keyframes hero-chevron {
   0%, 100% { transform: translateY(0); opacity: 0.45; }
