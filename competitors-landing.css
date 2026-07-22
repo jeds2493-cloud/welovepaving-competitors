@@ -513,7 +513,7 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
 }
 .pledge-head h2 {
   font-size: clamp(24px, 2.9vw, 42px); line-height: 1.02; font-weight: 900;
-  text-transform: uppercase; color: var(--yellow);
+  text-transform: uppercase; color: #fff;
 }
 .hero-content h1 .hl,
 .pledge-head h2 .hl,
