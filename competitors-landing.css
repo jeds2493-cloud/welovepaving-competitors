@@ -825,6 +825,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
    the screen. */
 .proposal-section { position: relative; z-index: 1; padding: clamp(18px, 2.6vh, 30px) 0; }
 .proposal-strip {
+  position: relative; overflow: hidden;
   display: grid;
   grid-template-columns: minmax(190px, 0.85fr) minmax(0, 2.4fr) auto;
   align-items: center; gap: clamp(18px, 2.4vw, 38px);
@@ -836,6 +837,16 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   border-radius: 12px;
   padding: clamp(16px, 1.8vw, 24px) clamp(18px, 2vw, 28px);
 }
+/* Barricade tape along the top edge. It is the one band on the page that cuts
+   across the flow, and the tape reads as the marker for exactly that. The
+   stripes are sized in px, not a percentage, so their pitch stays the same
+   whether the band is a phone wide or an ultrawide. */
+.proposal-strip::before {
+  content: ''; position: absolute; inset: 0 0 auto; height: 9px;
+  background: repeating-linear-gradient(-45deg,
+    var(--yellow) 0 11px, #14120E 11px 22px);
+}
+.proposal-strip { padding-top: calc(clamp(16px, 1.8vw, 24px) + 9px); }
 .proposal-title {
   font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em;
   font-size: clamp(17px, 1.5vw, 22px); line-height: 1.1; text-transform: uppercase;
@@ -1167,6 +1178,18 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   }
   .hero-content { margin-inline: 0; }
 
+  /* The strip runs the full width of the screen: it is a divider between two
+     tall sections, and inset in a container it read as one more card. The side
+     borders and the radius go with the edges. Its padding falls back to the
+     page's own gutter and grows to whatever centres a 1440 row, so the content
+     still lines up with every section above and below. */
+  .proposal-section { padding: 0; }
+  .proposal-section .lp-container { max-width: none; padding: 0; }
+  .proposal-strip {
+    border-radius: 0; border-left: 0; border-right: 0;
+    padding-inline: max(clamp(24px, 5vw, 64px), calc((100% - 1440px) / 2));
+  }
+
   /* P2 stops being a transparent panel over the scene and becomes its own dark
      section, so the six cards read as a set instead of floating on the art. It
      matches the hero's height so the snap lands on a full screen either way. */
@@ -1201,6 +1224,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 @media (min-width: 901px) and (max-width: 1180px) {
   .compare-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Three columns across a laptop leave the steps about four words wide and every
+     title breaks. The title takes its own row and the steps get the whole width. */
+  .proposal-strip { grid-template-columns: 1fr auto; row-gap: 14px; }
+  .proposal-lede { grid-column: 1 / -1; }
 }
 @media (max-width: 520px) {
   .compare-grid { grid-template-columns: 1fr; }
