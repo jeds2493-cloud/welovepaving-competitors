@@ -872,7 +872,18 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   line-height: 1.15; color: #fff; text-transform: uppercase; margin: 0;
 }
 .proposal-step h3 .icon { width: 14px; height: 14px; color: var(--yellow); flex: none; }
-.proposal-step p { font-size: 12.5px; line-height: 1.4; color: #C8C5BD; margin-top: 4px; }
+/* Two lines per step, them and us. The contrast is carried by weight and colour
+   rather than a label, so the pair reads as one sentence about the same thing
+   instead of a two-column table crammed into a strip. */
+.proposal-step p { font-size: 12.5px; line-height: 1.4; margin-top: 4px; }
+.proposal-them { color: #8E8B84; }
+.proposal-us { color: #E4E1DA; font-weight: 600; margin-top: 3px; }
+/* A short yellow rule instead of a bullet: enough to mark which line is ours
+   without another icon in a band that already carries four. */
+.proposal-us::before {
+  content: ''; display: inline-block; vertical-align: middle;
+  width: 10px; height: 2px; margin-right: 7px; background: var(--yellow);
+}
 
 .proposal-cta { display: flex; flex-direction: column; align-items: center; gap: 7px; }
 .proposal-cta .btn { white-space: nowrap; }
@@ -1188,7 +1199,12 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .proposal-strip {
     border-radius: 0; border-left: 0; border-right: 0;
     padding-inline: max(clamp(24px, 5vw, 64px), calc((100% - 1440px) / 2));
+    /* The headline takes the full row. Beside the steps it left both cramped:
+       the headline broke over three lines and each step ran about four words
+       wide, which is the shape the copy is trying to avoid. */
+    grid-template-columns: 1fr auto; row-gap: clamp(12px, 1.4vh, 18px);
   }
+  .proposal-lede { grid-column: 1 / -1; }
 
   /* P2 stops being a transparent panel over the scene and becomes its own dark
      section, so the six cards read as a set instead of floating on the art. It
@@ -1224,10 +1240,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 @media (min-width: 901px) and (max-width: 1180px) {
   .compare-grid { grid-template-columns: repeat(2, 1fr); }
-  /* Three columns across a laptop leave the steps about four words wide and every
-     title breaks. The title takes its own row and the steps get the whole width. */
-  .proposal-strip { grid-template-columns: 1fr auto; row-gap: 14px; }
-  .proposal-lede { grid-column: 1 / -1; }
 }
 @media (max-width: 520px) {
   .compare-grid { grid-template-columns: 1fr; }
