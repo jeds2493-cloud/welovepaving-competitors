@@ -52,7 +52,16 @@ html, body { margin: 0; }
 /* Mobile browsers inflate text on their own ("font boosting") when a text block
    is much wider than the viewport, which silently breaks a tuned type scale.
    The layout is already responsive, so opt out and keep the sizes we set. */
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  /* The page is vertical only. Clipping on the root propagates to the viewport,
+     so nothing can be dragged sideways, and overscroll-behavior-x stops the
+     horizontal rubber band and the swipe-to-navigate gesture along with it.
+     Only the horizontal axis is touched: the vertical scroll and its snapping
+     are untouched. */
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
 body {
   background: var(--bg-dark);
   color: var(--card-white);
@@ -305,6 +314,12 @@ html { scroll-snap-type: y proximity; }
   /* The chrome is fixed, so a plain scrollIntoView parks a section's top under
      it and the heading lands behind the header. */
   scroll-margin-top: calc(var(--utility-h) + var(--header-h));
+  /* The P2 cards enter translated 48px sideways, which is 48px of document width
+     until the reveal fires. Clipped here, at a full-bleed box whose edges are the
+     viewport's, so it never reaches the document. clip, not hidden: it is the one
+     value that pairs with overflow-y: visible instead of forcing it to auto and
+     turning the panel into a scroll container. */
+  overflow-x: clip;
 }
 /* Legibility scrim over the hero art. */
 .panel-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
