@@ -818,6 +818,82 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 .form-col .lead-card { flex: 1; display: flex; flex-direction: column; }
 .form-col .hero-embed { flex: 1; }
 
+/* ============ PROPOSAL SYSTEM STRIP ============
+   Sits between the pledge panel and the comparison table: the same card language
+   as the rest of the page, with the numbered tab standing in for the service
+   cards' category pill. */
+.proposal-head { max-width: 78ch; margin: 0 auto; text-align: center; }
+.proposal-head .lp-h2 { max-width: none; margin: 8px 0 0; }
+.proposal-sub {
+  font-size: clamp(14px, 1.35vw, 16px); line-height: 1.55; color: #C8C5BD;
+  max-width: 62ch; margin: 12px auto 0;
+}
+.proposal-grid {
+  list-style: none; margin: clamp(26px, 4vh, 40px) 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 22px);
+}
+.proposal-card {
+  display: flex; flex-direction: column;
+  background: rgba(27,24,19,0.86); backdrop-filter: blur(2px);
+  border: 1px solid var(--border-dark); border-radius: 12px; overflow: hidden;
+  transition: transform 0.2s var(--ease-mech), box-shadow 0.2s var(--ease-mech),
+              border-color 0.2s var(--ease-mech);
+}
+@media (hover: hover) and (pointer: fine) {
+  .proposal-grid .proposal-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+    border-color: rgba(242,194,48,0.45);
+  }
+}
+.proposal-body { padding: clamp(16px, 1.4vw, 22px) clamp(16px, 1.4vw, 22px) 0; }
+.proposal-step {
+  display: inline-block;
+  background: var(--yellow); color: var(--text-dark);
+  font-family: var(--font-mono); font-size: 10px; font-weight: 800;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 20px;
+}
+.proposal-card h3 {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--font-display); font-size: clamp(16px, 1.5vw, 21px); font-weight: 800;
+  line-height: 1.12; color: #fff; text-transform: uppercase; margin: 13px 0 0;
+}
+.proposal-card h3 .icon { width: 18px; height: 18px; color: var(--yellow); flex: none; }
+/* The illustration is a drawing, not a photo, so it gets room to breathe instead
+   of the service cards' edge-to-edge band. */
+.proposal-media {
+  margin: clamp(14px, 1.4vw, 20px) clamp(16px, 1.4vw, 22px);
+  border: 1px solid #2E2A22; border-radius: 8px; overflow: hidden;
+  background: #14120E;
+}
+.proposal-media svg { display: block; width: 100%; height: auto; }
+.proposal-card > p {
+  padding: 0 clamp(16px, 1.4vw, 22px) clamp(18px, 1.6vw, 24px);
+  margin-top: auto;
+  font-size: 13.5px; line-height: 1.5; color: #C8C5BD;
+}
+.proposal-cta {
+  margin-top: clamp(24px, 3.5vh, 38px);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.proposal-cta .icon { width: 16px; height: 16px; }
+.proposal-note { font-size: 13px; font-style: italic; color: #A9A69E; text-align: center; }
+
+/* Same entrance as the service cards: they sit in one row, so the observer fires
+   them together and the stagger comes from a per-card delay. */
+@media (prefers-reduced-motion: no-preference) {
+  .proposal-card {
+    opacity: 0; transform: translateY(34px);
+    transition: transform 600ms var(--ease-bounce), opacity 300ms var(--ease-mech),
+                box-shadow 260ms var(--ease-mech), border-color 260ms var(--ease-mech);
+    will-change: transform;
+  }
+  .proposal-card.is-in { opacity: 1; transform: none; }
+  .proposal-card:nth-child(2) { transition-delay: 90ms; }
+  .proposal-card:nth-child(3) { transition-delay: 180ms; }
+}
+
 .faq-list { display: flex; flex-direction: column; gap: 10px; margin-top: clamp(18px, 3vh, 28px); }
 .faq-item {
   border: 1px solid var(--border-dark); border-radius: 10px; overflow: hidden;
@@ -1014,6 +1090,13 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .cond-grid { grid-template-columns: 1fr 1fr; }
   .pledge-grid { grid-template-columns: 1fr 1fr; }
   .compare-grid { grid-template-columns: repeat(2, 1fr); }
+  /* One per row: the three steps are a sequence, and side by side at this width
+     the illustrations shrink to where the map's legend stops being readable. */
+  .proposal-grid { grid-template-columns: 1fr; }
+  .proposal-head { text-align: left; margin: 0; }
+  .proposal-sub { margin-left: 0; }
+  .proposal-cta { align-items: stretch; }
+  .proposal-cta .btn { justify-content: center; }
 }
 /* ============ DESKTOP ============ */
 @media (min-width: 901px) {

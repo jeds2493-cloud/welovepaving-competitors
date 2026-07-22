@@ -669,7 +669,7 @@ function initSideRays(host, opt) {
    The comparison cards slide in from alternating sides, the service cards rise;
    both are driven from here and the shapes live in CSS. The observer disconnects
    on the first hit: this is an entrance, not a toggle. */
-document.querySelectorAll('.compare-card, .cond-card').forEach((card) => {
+document.querySelectorAll('.compare-card, .cond-card, .proposal-card').forEach((card) => {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => {
       if (!en.isIntersecting) return;

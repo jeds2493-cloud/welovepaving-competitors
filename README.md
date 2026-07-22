@@ -47,6 +47,7 @@ to a welovepaving domain.
 | P1 | Hero | one screen tall; mobile gets its own portrait art and a scroll cue |
 | P2 | What to compare | the six advantages as folder-tab cards, all on screen at once |
 | P3 | The quality of our work | four self-performed services + four quality pillars |
+| — | Proposal system | the three pieces of a WLP proposal, then a CTA |
 | — | Compare + lead form | WLP-vs-typical comparison table beside the form |
 | — | FAQ | its own section above the footer |
 | — | Footer | legal links open in modals, nothing leaves the landing |
@@ -107,6 +108,10 @@ removed from the `href`.
   comparison-campaign tracking number in the header, hero, sticky bar and footer.
 - **Canonical / og:url.** Both point at
   `/lp/commercial-paving-comparison/`. Update if the final path differs.
+- **Proposal system illustrations.** The three panels in that section are inline
+  SVG drawings, not captures of a real proposal, so nothing there states a price,
+  a quantity or a client. If real screenshots are cleared for use, swap each
+  `.proposal-media > svg` for an `<img>`; nothing else in the section changes.
 - **`og:image`** points at `https://www.welovepaving.com/images/hero-bg.webp`,
   which has to exist at that URL for link previews to work.
 
