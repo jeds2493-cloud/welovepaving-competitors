@@ -831,9 +831,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   align-items: center; gap: clamp(18px, 2.4vw, 38px);
   background: rgba(27,24,19,0.86); backdrop-filter: blur(2px);
   border: 1px solid var(--border-dark);
-  /* The yellow edge marks it as the band that leads to the form, the way the
-     WLP column does in the table below. */
-  border-left: 3px solid var(--yellow);
   border-radius: 12px;
   padding: clamp(16px, 1.8vw, 24px) clamp(18px, 2vw, 28px);
 }
@@ -1199,12 +1196,23 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .proposal-strip {
     border-radius: 0; border-left: 0; border-right: 0;
     padding-inline: max(clamp(24px, 5vw, 64px), calc((100% - 1440px) / 2));
-    /* The headline takes the full row. Beside the steps it left both cramped:
-       the headline broke over three lines and each step ran about four words
-       wide, which is the shape the copy is trying to avoid. */
-    grid-template-columns: 1fr auto; row-gap: clamp(12px, 1.4vh, 18px);
+    /* Two rows: the headline and the CTA share the top, the three steps take the
+       full width underneath. Beside the steps the headline broke over three
+       lines and left each one about four words wide, which is the shape this
+       copy exists to avoid. */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'lede cta' 'steps steps';
+    align-items: center;
+    row-gap: clamp(18px, 2.2vh, 28px);
+    padding-block: clamp(24px, 3vh, 38px);
   }
-  .proposal-lede { grid-column: 1 / -1; }
+  .proposal-lede { grid-area: lede; }
+  .proposal-cta { grid-area: cta; }
+  .proposal-steps { grid-area: steps; }
+  /* Stretch, so the dividers between the steps run the height of the tallest
+     one instead of stopping at their own text. */
+  .proposal-steps { align-items: stretch; }
+  .proposal-title { font-size: clamp(19px, 1.7vw, 26px); }
 
   /* P2 stops being a transparent panel over the scene and becomes its own dark
      section, so the six cards read as a set instead of floating on the art. It
