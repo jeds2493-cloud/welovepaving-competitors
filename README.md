@@ -45,10 +45,11 @@ to a welovepaving domain.
 | # | Section | Notes |
 |---|---------|-------|
 | P1 | Hero | one screen tall; mobile gets its own portrait art and a scroll cue |
-| P2 | What to compare | the six advantages as folder-tab cards, all on screen at once |
+| P2 | The traps | six folder-tab cards, each a trap then what WLP does, all on one screen |
 | P3 | The quality of our work | four self-performed services + four quality pillars |
-| — | Proposal system | one band naming the three pieces of a proposal |
+| — | Proposal system | one band, six steps, what they send against what we send |
 | — | Compare + lead form | WLP-vs-typical comparison table beside the form |
+| — | Proposal audit | the last off ramp: have us read the proposal they already hold |
 | — | FAQ | its own section above the footer |
 | — | Footer | legal links open in modals, nothing leaves the landing |
 
@@ -74,6 +75,18 @@ to a welovepaving domain.
   moved into the modal and put back on close rather than duplicated — a second
   embed would mean a second iframe and a second conversion tag.
 - **Legal modals**: same component as the striping and concrete landings.
+- **One screen for P2**: the six cards have to fit under the chrome without
+  scrolling. Their rows are sized by content rather than by an even split of the
+  leftover height, which packed every card to its last pixel; below 900px of
+  viewport height a separate step drops the type and spacing a notch, because two
+  rows of this much copy plus the heading do not fit there at the full sizes.
+- **The 15-year term never appears without its conditions.** The hero headline,
+  the hero bullets, the first P2 card, the comparison table and the transfer line
+  in the proposal strip all carry the same `.terms-ref` asterisk, which opens the
+  Panda Pledge disclaimer. Keep that pairing on any new copy that states the term.
+- **Nothing scrolls sideways.** The root clips its horizontal axis and refuses
+  horizontal overscroll, and `.panel` clips its own, because the P2 cards enter
+  translated 48px and that offset would otherwise count as document width.
 
 ## Performance
 
@@ -102,16 +115,28 @@ Regenerate them with `tools/extract-legal.js` whenever Legal edits a page. If a
 fetch fails at runtime the modal falls back to the real link, which was never
 removed from the `href`.
 
+## Copy conventions
+
+- **"Paving Advisor"**, never "project advisor" or "sales rep".
+- **No em dashes** anywhere in the landing copy.
+- Claims about competitors are written about the typical pattern, never about a
+  named company, and stay on what the visitor will experience rather than on any
+  one contractor's conduct.
+
 ## Placeholders to replace before launch
 
 - **Tracking phone number.** `(888) 273-0077` is the main line. Swap it for the
   comparison-campaign tracking number in the header, hero, sticky bar and footer.
 - **Canonical / og:url.** Both point at
   `/lp/commercial-paving-comparison/`. Update if the final path differs.
-- **Proposal strip illustrations.** The three drawings in that band are inline
-  SVG, not captures of a real proposal, so nothing there states a price, a
-  quantity or a client. If real screenshots are cleared for use, an `<img>` drops
-  into `.proposal-media` and nothing else changes.
+- **Proposal strip illustrations.** The six drawings in that band are inline SVG,
+  not captures of a real proposal, so nothing there states a price, a quantity or
+  a client. If real screenshots are cleared for use, an `<img>` drops into
+  `.proposal-media` and nothing else changes.
+- **The "only company" claim.** The hero headline states an absolute: the only
+  company with a 15-year warranty. Everywhere else the page says "up to 15 years"
+  on qualifying work. Legal should sign off on the exclusivity claim before this
+  runs as paid traffic.
 - **`og:image`** points at `https://www.welovepaving.com/images/hero-bg.webp`,
   which has to exist at that URL for link previews to work.
 

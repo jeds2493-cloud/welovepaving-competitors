@@ -43,8 +43,10 @@
     1.06 56%, 0.98 64%, 0.96 70%, 0.99 78%, 1.02 86%, 1.01 92%, 1
   );
 
-  /* The trap lines and nothing else: it has to read as a warning without
-     competing with the yellow, which is ours. */
+  /* The trap lines in section 2 and nothing else: it has to read as a warning
+     without competing with the yellow, which is ours. Deliberately not
+     --error-red, which the shared token block reserves for form error states:
+     this marks what a competitor does, not something the visitor got wrong. */
   --warn: #E2564B;
 
   --utility-h: 35px;
