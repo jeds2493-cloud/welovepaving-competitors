@@ -850,25 +850,25 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   color: #fff; margin-top: 6px;
 }
 .proposal-title .hl { color: var(--yellow); }
-/* The second headline opens the other half of the band, so it gets a rule above
-   it: without one the six steps ran together as a single list. */
-.proposal-lede--second { border-top: 1px solid var(--border-dark); padding-top: clamp(16px, 2vh, 24px); }
 .proposal-us .terms-ref { color: var(--yellow); font-weight: 700; text-decoration: none; padding-left: 2px; }
 .proposal-us .terms-ref:hover,
 .proposal-us .terms-ref:focus-visible { text-decoration: underline; }
 
 .proposal-steps {
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.8vw, 28px);
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  column-gap: clamp(14px, 1.8vw, 28px); row-gap: clamp(20px, 2.6vh, 32px);
 }
 .proposal-step { display: flex; align-items: flex-start; gap: 10px; }
 /* min-width: 0 so the body can shrink to its column: a flex item defaults to
    its content's min size, and the drawing would push the three columns wider
    than the row. */
 .proposal-step > div { min-width: 0; flex: 1; }
-/* Only a divider between the steps, so the three read as one sequence rather
-   than three boxes. */
+/* Only a divider between the steps, so they read as one sequence rather than a
+   row of boxes. Cleared on every row's first item, which starts a row rather
+   than continuing one. */
 .proposal-step + .proposal-step { border-left: 1px solid var(--border-dark); padding-left: clamp(14px, 1.8vw, 28px); }
+.proposal-step:nth-child(3n + 1) { border-left: 0; padding-left: 0; }
 .proposal-num {
   font-family: var(--font-mono); font-size: 12px; font-weight: 800;
   color: var(--yellow); line-height: 1.3; flex: none;
@@ -1121,6 +1121,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     border-left: 0; padding-left: 0;
     border-top: 1px solid var(--border-dark); padding-top: 12px;
   }
+  .proposal-step:nth-child(3n + 1) { padding-left: 0; }
   /* Stacked, three drawings at column width turn the band into most of a screen
      on its own. Half width keeps each one readable and the band scrollable in
      one go. */
