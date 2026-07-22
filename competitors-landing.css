@@ -856,6 +856,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.8vw, 28px);
 }
 .proposal-step { display: flex; align-items: flex-start; gap: 10px; }
+/* min-width: 0 so the body can shrink to its column: a flex item defaults to
+   its content's min size, and the drawing would push the three columns wider
+   than the row. */
+.proposal-step > div { min-width: 0; flex: 1; }
 /* Only a divider between the steps, so the three read as one sequence rather
    than three boxes. */
 .proposal-step + .proposal-step { border-left: 1px solid var(--border-dark); padding-left: clamp(14px, 1.8vw, 28px); }
@@ -869,6 +873,19 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   line-height: 1.15; color: #fff; text-transform: uppercase; margin: 0;
 }
 .proposal-step h3 .icon { width: 14px; height: 14px; color: var(--yellow); flex: none; }
+/* The illustration of what each piece actually looks like. Drawn, not captured,
+   so nothing here states a price, a quantity or a client that a real proposal
+   would have to match. If real screenshots are ever cleared for use, an <img>
+   drops straight into this box. */
+.proposal-media {
+  /* Capped: left to fill a 1440 column the drawing runs about 400px wide and
+     towers over the two lines under it, which are the point. */
+  max-width: 330px;
+  margin: 10px 0 9px;
+  border: 1px solid #2E2A22; border-radius: 6px; overflow: hidden;
+  background: #14120E;
+}
+.proposal-media svg { display: block; width: 100%; height: auto; }
 /* Two lines per step, them and us. The contrast is carried by weight and colour
    rather than a label, so the pair reads as one sentence about the same thing
    instead of a two-column table crammed into a strip. */
@@ -1098,6 +1115,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     border-left: 0; padding-left: 0;
     border-top: 1px solid var(--border-dark); padding-top: 12px;
   }
+  /* Stacked, three drawings at column width turn the band into most of a screen
+     on its own. Half width keeps each one readable and the band scrollable in
+     one go. */
+  .proposal-media { max-width: 200px; }
 
 }
 /* ============ DESKTOP ============ */

@@ -108,6 +108,10 @@ removed from the `href`.
   comparison-campaign tracking number in the header, hero, sticky bar and footer.
 - **Canonical / og:url.** Both point at
   `/lp/commercial-paving-comparison/`. Update if the final path differs.
+- **Proposal strip illustrations.** The three drawings in that band are inline
+  SVG, not captures of a real proposal, so nothing there states a price, a
+  quantity or a client. If real screenshots are cleared for use, an `<img>` drops
+  into `.proposal-media` and nothing else changes.
 - **`og:image`** points at `https://www.welovepaving.com/images/hero-bg.webp`,
   which has to exist at that URL for link previews to work.
 
