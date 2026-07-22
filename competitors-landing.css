@@ -1013,11 +1013,14 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .scene-bg::after {
     content: "";
     position: absolute; inset: 0;
+    /* Pulled back so the veil only dissolves the art's left edge into the copy
+       instead of hazing a third of the photo: clear by 34% rather than 55%, and
+       lighter through the middle of the ramp. */
     background: linear-gradient(90deg,
       var(--bg-dark) 0%,
-      rgba(20,18,14,0.72) 14%,
-      rgba(20,18,14,0.18) 34%,
-      rgba(20,18,14,0) 55%);
+      rgba(20,18,14,0.60) 10%,
+      rgba(20,18,14,0.12) 24%,
+      rgba(20,18,14,0) 34%);
   }
 
   /* The art's bottom edge is mid-tone asphalt and P2 starts at --bg-dark, so the

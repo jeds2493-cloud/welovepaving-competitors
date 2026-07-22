@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="competitors-landing.css">
 <link rel="preload" as="image" href="images/hero-bg.webp" media="(min-width: 901px)" fetchpriority="high"
       imagesrcset="images/hero-bg-1800.webp 1800w, images/hero-bg.webp 2880w, images/hero-bg-4400.webp 4400w"
-      imagesizes="89vw">
+      imagesizes="165vw">
 <link rel="preload" as="image" href="images/hero-bg-mobile.webp" media="(max-width: 900px)" fetchpriority="high">
 </head>
 <body>
@@ -100,17 +100,19 @@
          separate art direction, so it is a <source>, not a srcset density hint.
          Only one of the two is ever fetched.
 
-         The desktop art is offered at three widths. It needs more pixels than its
-         box suggests: the layer is 58% of the hero and the art is scaled 1.54x on
-         top, so it renders at roughly 89vw — which is what `sizes` tells the
-         browser, and why a 1920 screen at DPR 2 genuinely wants ~3400px. -->
+         The desktop art is offered at three widths, and `sizes` deliberately
+         declares far more than the box is wide. With object-fit: cover the box
+         (~1.1 aspect) is much taller than the source (~2.0), so the scale is set
+         by HEIGHT, not width: at 1440 the box wants a 2340px-wide file even though
+         it only paints 1273px of it. Declaring the box width had the browser hand
+         back an 1800px file that then upscaled 1.30x — the softness. -->
     <picture>
       <source media="(max-width: 900px)" srcset="images/hero-bg-mobile.webp">
       <img src="images/hero-bg.webp" alt=""
            srcset="images/hero-bg-1800.webp 1800w,
                    images/hero-bg.webp 2880w,
                    images/hero-bg-4400.webp 4400w"
-           sizes="(max-width: 900px) 100vw, 89vw">
+           sizes="(max-width: 900px) 100vw, 165vw">
     </picture>
   </div>
 
