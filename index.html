@@ -21,7 +21,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@600;700&display=swap"></noscript>
 <link rel="stylesheet" href="competitors-landing.css">
-<link rel="preload" as="image" href="images/hero-bg.webp" media="(min-width: 901px)" fetchpriority="high">
+<link rel="preload" as="image" href="images/hero-bg.webp" media="(min-width: 901px)" fetchpriority="high"
+      imagesrcset="images/hero-bg-1800.webp 1800w, images/hero-bg.webp 2880w, images/hero-bg-4400.webp 4400w"
+      imagesizes="89vw">
 <link rel="preload" as="image" href="images/hero-bg-mobile.webp" media="(max-width: 900px)" fetchpriority="high">
 </head>
 <body>
@@ -96,10 +98,19 @@
   <div class="scene-bg" data-scene aria-hidden="true">
     <!-- The ultrawide crop is unusable on a phone; the portrait version is a
          separate art direction, so it is a <source>, not a srcset density hint.
-         Only one of the two is ever fetched. -->
+         Only one of the two is ever fetched.
+
+         The desktop art is offered at three widths. It needs more pixels than its
+         box suggests: the layer is 58% of the hero and the art is scaled 1.54x on
+         top, so it renders at roughly 89vw — which is what `sizes` tells the
+         browser, and why a 1920 screen at DPR 2 genuinely wants ~3400px. -->
     <picture>
       <source media="(max-width: 900px)" srcset="images/hero-bg-mobile.webp">
-      <img src="images/hero-bg.webp" alt="">
+      <img src="images/hero-bg.webp" alt=""
+           srcset="images/hero-bg-1800.webp 1800w,
+                   images/hero-bg.webp 2880w,
+                   images/hero-bg-4400.webp 4400w"
+           sizes="(max-width: 900px) 100vw, 89vw">
     </picture>
   </div>
 

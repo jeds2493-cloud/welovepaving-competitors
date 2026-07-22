@@ -988,19 +988,25 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     height: var(--hero-h, calc(100svh - var(--utility-h) - var(--header-h)));
     bottom: auto;
   }
+  /* The enlargement is real width/height, not `transform: scale()`. A transform
+     rasterises the image at its layout size and then magnifies that bitmap on the
+     GPU, so a 1.54x scale was showing 65% of the detail the file actually has —
+     which is the softness, and no amount of extra source resolution fixed it.
+     Sized this way the browser rasterises at the final size.
+
+     154% about an origin at 56%/60% (on the panda) means the box grows 54% and is
+     pulled back by that share of the growth, so the framing is identical and every
+     side still overhangs for the pointer drift. */
   .scene-bg img {
-    left: 0; right: auto;
-    width: 100%; height: 100%;
+    width: 154%; height: 154%;
+    left: -30.2%;   /* -(154 - 100) * 0.56 */
+    top: -32.4%;    /* -(154 - 100) * 0.60 */
+    right: auto;
     object-position: 50% 50%;
-    /* The origin sits on the panda rather than in the middle of the box, so the
-       scale grows the scene around him and he stays where he is instead of
-       sliding with the enlargement. Every side still gains overhang, so the
-       pointer drift never exposes an edge. */
-    transform-origin: 56% 60%;
     transform: translate3d(
       var(--px, 0px),
       calc(var(--py, 0px) + var(--scene-y, 0px)),
-      0) scale(1.54);
+      0);
   }
   /* The art's left edge is a hard cut against the copy's background, so it is
      dissolved rather than butted up. */
