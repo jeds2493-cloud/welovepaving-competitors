@@ -882,7 +882,6 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   width: 10px; height: 2px; margin-right: 7px; background: var(--yellow);
 }
 
-.proposal-note { font-size: 12px; font-style: italic; color: #A9A69E; }
 
 /* One entrance for the whole band: it is a single row, and three staggered
    pieces inside a strip this short read as a stutter. */
@@ -1196,17 +1195,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
        full width underneath. Beside the steps the headline broke over three
        lines and left each one about four words wide, which is the shape this
        copy exists to avoid. */
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'lede note' 'steps steps';
-    align-items: center;
+    grid-template-columns: 1fr;
     row-gap: clamp(18px, 2.2vh, 28px);
     padding-block: clamp(24px, 3vh, 38px);
   }
-  .proposal-lede { grid-area: lede; }
-  /* Sits with the headline rather than under the steps: it is a closing note on
-     the claim, and on its own row it looked like a fourth step. */
-  .proposal-note { grid-area: note; text-align: right; }
-  .proposal-steps { grid-area: steps; }
   /* Stretch, so the dividers between the steps run the height of the tallest
      one instead of stopping at their own text. */
   .proposal-steps { align-items: stretch; }
