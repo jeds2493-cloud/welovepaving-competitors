@@ -503,6 +503,7 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
   font-size: clamp(24px, 2.9vw, 42px); line-height: 1.02; font-weight: 900;
   text-transform: uppercase; color: var(--yellow);
 }
+.hero-content h1 .hl,
 .pledge-head h2 .hl,
 .compare-content h2 .hl { color: var(--yellow); }
 .pledge-head .sub {
