@@ -356,9 +356,9 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
   font-size: clamp(32px, 4.2vw, 58px); line-height: 1.02; font-weight: 900;
   text-transform: uppercase; color: var(--card-white); margin-bottom: 18px;
 }
-/* The headline is two sentences; the second gets its own line so the promise
-   reads as a beat of its own rather than wrapping wherever the width lands. */
-.hero-content h1 .h1-line { display: block; }
+/* The headline is two sentences. A space before the second (not a line break) so
+   it flows and wraps naturally instead of forcing a hard break after "Quote." */
+.hero-content h1 .h1-line::before { content: " "; }
 .hero-content .lede {
   font-size: clamp(15px, 1.5vw, 18px); line-height: 1.5; color: #D6D3CB;
   max-width: 48ch; margin-bottom: 22px;
