@@ -356,6 +356,9 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
   font-size: clamp(32px, 4.2vw, 58px); line-height: 1.02; font-weight: 900;
   text-transform: uppercase; color: var(--card-white); margin-bottom: 18px;
 }
+/* The headline is two sentences; the second gets its own line so the promise
+   reads as a beat of its own rather than wrapping wherever the width lands. */
+.hero-content h1 .h1-line { display: block; }
 .hero-content .lede {
   font-size: clamp(15px, 1.5vw, 18px); line-height: 1.5; color: #D6D3CB;
   max-width: 48ch; margin-bottom: 22px;
@@ -366,7 +369,7 @@ html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
 .hero-bullets {
   list-style: none; margin: 0 0 26px; padding: 0;
   display: grid; grid-auto-flow: column;
-  grid-template-rows: repeat(4, auto);
+  grid-template-rows: repeat(3, auto);
   grid-template-columns: auto auto;
   justify-content: start;
   column-gap: clamp(24px, 3vw, 48px); row-gap: 10px;
@@ -1017,16 +1020,15 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 
 @media (max-width: 900px) {
-  /* Seven stacked rows ran the copy 600px down the hero, straight over the panda.
-     The three protection claims are too long to pair up, so they keep a full row
-     each and the four short service names fall into a 2x2 underneath: five rows
-     instead of seven, and the art gets its lower half back. */
+  /* Stacked one per row: the six differentiators are full sentences and pairing
+     them into two columns on a phone breaks them across two and three lines. On
+     mobile the bullets are hidden anyway (see below); this just governs the tablet
+     band between 620 and 900. */
   .hero-bullets {
     grid-auto-flow: row; grid-template-rows: none;
     grid-template-columns: 1fr 1fr;
     column-gap: 14px; row-gap: 9px;
   }
-  .hero-bullets li:nth-child(-n+3) { grid-column: 1 / -1; }
   .hero-bullets li { font-size: 14px; }
   .hero-bullets b { font-size: 15px; }
 }
