@@ -338,58 +338,50 @@
 <div class="post-hero">
 
 <!-- ===== VERTICAL: FAQ + lead form ===== -->
-<section class="lp-section" aria-label="Common questions and project review" data-view="faq_form_view">
+<section class="lp-section" aria-label="Compare and request a review" data-view="compare_form_view">
   <div class="lp-container faq-form-grid">
 
-    <div class="faq-col">
-      <h2 class="lp-h2">Common Questions <span class="hl">Before Choosing a Paving Contractor</span></h2>
-      <div class="faq-list">
-        <div class="faq-item">
-          <h3>
-            <button type="button" class="faq-q" aria-expanded="true" aria-controls="cf-1">
-              What should I compare besides price?
-              <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
-            </button>
-          </h3>
-          <div class="faq-a" id="cf-1">Compare preparation, materials, scope exclusions, scheduling, communication, warranty terms and post-project support. Those are what separate a lasting result from a quick one.</div>
-        </div>
-        <div class="faq-item">
-          <h3>
-            <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-2">
-              Can WLP review an existing proposal?
-              <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
-            </button>
-          </h3>
-          <div class="faq-a" id="cf-2" hidden>Yes. Share what you already have and a WLP Paving Advisor can walk through the scope, materials and terms so you can compare it clearly.</div>
-        </div>
-        <div class="faq-item">
-          <h3>
-            <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-3">
-              Does every project receive a 15-year warranty?
-              <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
-            </button>
-          </h3>
-          <div class="faq-a" id="cf-3" hidden>No. Up-to-15-year written protection applies to qualifying work and is subject to scope, installation requirements, maintenance responsibilities and applicable terms. A WLP Paving Advisor will confirm what your project qualifies for.</div>
-        </div>
-        <div class="faq-item">
-          <h3>
-            <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-4">
-              How quickly will WLP respond?
-              <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
-            </button>
-          </h3>
-          <div class="faq-a" id="cf-4" hidden>We aim to respond within about two hours during business hours, then follow up to schedule a review of the property.</div>
-        </div>
-        <div class="faq-item">
-          <h3>
-            <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-5">
-              Why should I choose WLP?
-              <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
-            </button>
-          </h3>
-          <div class="faq-a" id="cf-5" hidden>Written protection, clear scope and dedicated project support, backed by workmanship built to hold up under real commercial traffic. You get the details in writing before work begins.</div>
-        </div>
+    <div class="compare-col">
+      <h2 class="lp-h2">Compare <span class="hl">Before You Choose</span></h2>
+      <div class="cmp-wrap">
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col" class="cmp-wlp">We Love Paving</th>
+              <th scope="col">Typical contractor</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <th scope="row">Up to 15-year written warranty</th>
+            <td class="cmp-yes"><svg class="icon" aria-hidden="true"><use href="#i-badge-check"/></svg><span class="sr-only">Yes</span></td>
+            <td class="cmp-no">Usually not offered</td>
+          </tr>
+          <tr>
+            <th scope="row">Documented coverage</th>
+            <td class="cmp-yes"><svg class="icon" aria-hidden="true"><use href="#i-badge-check"/></svg><span class="sr-only">Yes</span></td>
+            <td class="cmp-no">Rarely</td>
+          </tr>
+          <tr>
+            <th scope="row">Proposal walkthrough</th>
+            <td class="cmp-yes"><svg class="icon" aria-hidden="true"><use href="#i-badge-check"/></svg><span class="sr-only">Yes</span></td>
+            <td class="cmp-no">Sometimes</td>
+          </tr>
+          <tr>
+            <th scope="row">Dedicated advisor</th>
+            <td class="cmp-yes"><svg class="icon" aria-hidden="true"><use href="#i-badge-check"/></svg><span class="sr-only">Yes</span></td>
+            <td class="cmp-no">Sometimes</td>
+          </tr>
+          <tr>
+            <th scope="row">Digital project history</th>
+            <td class="cmp-yes"><svg class="icon" aria-hidden="true"><use href="#i-badge-check"/></svg><span class="sr-only">Yes</span></td>
+            <td class="cmp-no">Rarely</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
+      <p class="cmp-note">Based on how commercial paving proposals are typically presented. Individual contractors vary.</p>
     </div>
 
     <div class="form-col">
@@ -406,6 +398,60 @@
       </div>
     </div>
 
+  </div>
+</section>
+
+<!-- ===== VERTICAL: FAQ (its own section, before the footer) ===== -->
+<section class="lp-section faq-section" aria-label="Common questions" data-view="faq_view">
+  <div class="lp-container">
+    <h2 class="lp-h2 faq-h2">Common Questions <span class="hl">Before Choosing a Paving Contractor</span></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <h3>
+          <button type="button" class="faq-q" aria-expanded="true" aria-controls="cf-1">
+            What should I compare besides price?
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </button>
+        </h3>
+        <div class="faq-a" id="cf-1">Compare preparation, materials, scope exclusions, scheduling, communication, warranty terms and post-project support. Those are what separate a lasting result from a quick one.</div>
+      </div>
+      <div class="faq-item">
+        <h3>
+          <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-2">
+            Can WLP review an existing proposal?
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </button>
+        </h3>
+        <div class="faq-a" id="cf-2" hidden>Yes. Share what you already have and a WLP Paving Advisor can walk through the scope, materials and terms so you can compare it clearly.</div>
+      </div>
+      <div class="faq-item">
+        <h3>
+          <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-3">
+            Does every project receive a 15-year warranty?
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </button>
+        </h3>
+        <div class="faq-a" id="cf-3" hidden>No. Up-to-15-year written protection applies to qualifying work and is subject to scope, installation requirements, maintenance responsibilities and applicable terms. A WLP Paving Advisor will confirm what your project qualifies for.</div>
+      </div>
+      <div class="faq-item">
+        <h3>
+          <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-4">
+            How quickly will WLP respond?
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </button>
+        </h3>
+        <div class="faq-a" id="cf-4" hidden>We aim to respond within about two hours during business hours, then follow up to schedule a review of the property.</div>
+      </div>
+      <div class="faq-item">
+        <h3>
+          <button type="button" class="faq-q" aria-expanded="false" aria-controls="cf-5">
+            Why should I choose WLP?
+            <svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </button>
+        </h3>
+        <div class="faq-a" id="cf-5" hidden>Written protection, clear scope and dedicated project support, backed by workmanship built to hold up under real commercial traffic. You get the details in writing before work begins.</div>
+      </div>
+    </div>
   </div>
 </section>
 

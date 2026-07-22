@@ -47,7 +47,8 @@ to a welovepaving domain.
 | P1 | Hero | one screen tall; mobile gets its own portrait art and a scroll cue |
 | P2 | What to compare | the six advantages as folder-tab cards, all on screen at once |
 | P3 | The quality of our work | four self-performed services + four quality pillars |
-| — | FAQ + lead form | |
+| — | Compare + lead form | WLP-vs-typical comparison table beside the form |
+| — | FAQ | its own section above the footer |
 | — | Footer | legal links open in modals, nothing leaves the landing |
 
 ## Interaction notes
