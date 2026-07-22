@@ -850,6 +850,12 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   color: #fff; margin-top: 6px;
 }
 .proposal-title .hl { color: var(--yellow); }
+/* The second headline opens the other half of the band, so it gets a rule above
+   it: without one the six steps ran together as a single list. */
+.proposal-lede--second { border-top: 1px solid var(--border-dark); padding-top: clamp(16px, 2vh, 24px); }
+.proposal-us .terms-ref { color: var(--yellow); font-weight: 700; text-decoration: none; padding-left: 2px; }
+.proposal-us .terms-ref:hover,
+.proposal-us .terms-ref:focus-visible { text-decoration: underline; }
 
 .proposal-steps {
   list-style: none; margin: 0; padding: 0;
