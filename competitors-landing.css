@@ -502,6 +502,30 @@ html { scroll-snap-type: y proximity; }
 /* The differentiator inside the answer — ties the card straight back to the hero
    promise so the 15-year term does not get lost among the other arguments. */
 .card-hl { color: var(--yellow); font-weight: 800; }
+/* A highlight sweeping across the term, so the one claim the whole page is built
+   on catches the eye in a grid of six cards that otherwise look alike. The plain
+   yellow above is the fallback: with reduced motion the text stays solid rather
+   than sitting under a frozen gradient. Painted as one unbroken box (the inline
+   default), so a wrapped line continues the sweep instead of restarting it. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Guarded: the effect needs a transparent colour to show through, so anywhere
+     the clip is not supported the text would come out invisible rather than
+     unstyled. */
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    .card-hl {
+      background: linear-gradient(100deg,
+        var(--yellow) 42%, #FFF4CE 50%, var(--yellow) 58%);
+      background-size: 260% 100%;
+      -webkit-background-clip: text; background-clip: text;
+      color: transparent;
+      animation: card-hl-shine 5s linear infinite;
+    }
+  }
+  @keyframes card-hl-shine {
+    from { background-position: 160% 0; }
+    to { background-position: -60% 0; }
+  }
+}
 
 /* The Written Warranty card is the one that matters most, so it carries the gold
    edge and a soft glow instead of the flat border the rest share. Its tab is the
