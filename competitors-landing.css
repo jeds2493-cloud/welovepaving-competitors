@@ -376,9 +376,19 @@ html { scroll-snap-type: y proximity; }
   font-size: clamp(32px, 4.2vw, 58px); line-height: 1.02; font-weight: 900;
   text-transform: uppercase; color: var(--card-white); margin-bottom: 18px;
 }
-/* The headline is two sentences. A space before the second (not a line break) so
-   it flows and wraps naturally instead of forcing a hard break after "Quote." */
+/* The headline is one sentence over two lines. A space before the second half
+   (not a line break) so it wraps naturally on a narrow screen instead of
+   breaking in a fixed place. */
 .hero-content h1 .h1-line::before { content: " "; }
+/* The asterisk on the headline is the same link the bullets and the table carry:
+   the term never appears anywhere on this page without its conditions one click
+   away. Sized down and lifted so it reads as a reference, not part of the word. */
+.hero-content h1 .terms-ref {
+  color: #fff; font-weight: 800; text-decoration: none;
+  font-size: 0.45em; vertical-align: super; padding-left: 2px;
+}
+.hero-content h1 .terms-ref:hover,
+.hero-content h1 .terms-ref:focus-visible { text-decoration: underline; }
 .hero-content .lede {
   font-size: clamp(15px, 1.5vw, 18px); line-height: 1.5; color: #D6D3CB;
   max-width: 48ch; margin-bottom: 22px;
