@@ -592,7 +592,9 @@ html { scroll-snap-type: y proximity; }
 .lp-h2 .hl { color: var(--yellow); }
 .pledge-head .sub {
   font-size: clamp(14px, 1.35vw, 16px); line-height: 1.5; color: #C8C5BD;
-  max-width: 64ch; margin-top: 10px;
+  /* Wider than the 64ch it reads at elsewhere: over a four column row the intro
+     ran to three lines and pushed the section past a screen. */
+  max-width: 96ch; margin-top: 10px;
 }
 
 
@@ -635,7 +637,11 @@ html { scroll-snap-type: y proximity; }
   font-family: var(--font-display); font-size: clamp(15px, 1.3vw, 18px); font-weight: 800;
   line-height: 1.12; color: #fff; text-transform: uppercase; margin: 12px 0 7px;
 }
-.cond-card p { font-size: 12.5px; line-height: 1.42; color: #C8C5BD; margin-bottom: 14px; }
+.cond-card p { font-size: 12.5px; line-height: 1.42; color: #E4E1DA; margin-bottom: 14px; }
+/* The half of the sentence that belongs to them sits back a shade, so the eye
+   lands on ours. Section 2 does the same with two lines; here the card is a
+   quarter of a row, so it is one sentence with two weights instead. */
+.cond-trap { color: #8E8B84; }
 .cond-media { height: clamp(96px, 14vh, 150px); border-top: 1px solid #2E2A22; border-bottom: 1px solid #2E2A22; }
 .cond-media img { width: 100%; height: 100%; object-fit: cover; }
 .cond-foot { padding: clamp(12px, 1.1vw, 16px); margin-top: auto; }
@@ -976,25 +982,46 @@ html.svc-open, html.svc-open body { overflow: hidden; }
    The last off ramp before the FAQ. It runs wider and quieter than the lead card
    above it: the ask is smaller, so it should not look like a second form. */
 .audit-card {
-  display: grid; grid-template-columns: minmax(0, 1.35fr) auto;
-  align-items: center; gap: clamp(20px, 3vw, 48px);
   background: rgba(27,24,19,0.86); backdrop-filter: blur(2px);
   border: 1px solid var(--border-dark); border-radius: 14px;
-  padding: clamp(22px, 2.6vw, 34px) clamp(22px, 2.8vw, 40px);
+  padding: clamp(24px, 3vw, 40px) clamp(22px, 2.8vw, 40px);
 }
-.audit-h2 { max-width: 26ch; font-size: clamp(22px, 2.4vw, 32px); }
-.audit-copy p {
-  margin-top: 12px; font-size: 14px; line-height: 1.55; color: #C8C5BD; max-width: 62ch;
+/* Across the top rather than beside the copy: it is the last thing asked before
+   the FAQ, and on one line it lands as a sentence instead of a column of
+   fragments. It sizes off the viewport so it holds that line down to a laptop. */
+.audit-h2 {
+  font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em;
+  font-size: clamp(24px, 3vw, 42px); line-height: 1.06; text-transform: uppercase;
+  color: #fff; text-wrap: balance;
 }
-.audit-actions { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
-.audit-actions .btn { justify-content: center; white-space: nowrap; }
-.audit-actions .icon { width: 16px; height: 16px; }
-.audit-phone {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  font-family: var(--font-display); font-weight: 800; font-size: 18px;
-  color: #fff; min-height: 44px;
+.audit-h2 .hl { color: var(--yellow); }
+.audit-body {
+  margin-top: clamp(18px, 2.4vw, 28px);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: clamp(22px, 3vw, 44px); align-items: center;
 }
-.audit-phone .icon { color: var(--yellow); }
+.audit-copy p { font-size: 15px; line-height: 1.55; color: #C8C5BD; max-width: 58ch; }
+.audit-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(18px, 2vw, 26px); }
+/* Both routes are buttons here. The phone used to be bare text beside a filled
+   button, which read as a footnote rather than the second way to reach us. */
+.audit-cta {
+  flex: 1 1 220px; justify-content: center; white-space: nowrap;
+  font-size: 15px; padding: 15px 22px; min-height: 52px;
+}
+.audit-actions .icon { width: 17px; height: 17px; }
+
+/* 16:9, so swapping the placeholder for the real player shifts nothing. */
+.audit-video {
+  width: 100%; aspect-ratio: 16 / 9; border-radius: 12px;
+  background: #14120E; border: 1px solid var(--border-dark);
+  display: block; object-fit: cover;
+}
+.audit-video--empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  border-style: dashed; border-color: rgba(242,194,48,0.35); color: #8E8B84;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.audit-video--empty .icon { width: 44px; height: 44px; color: rgba(242,194,48,0.55); }
 
 .faq-list { display: flex; flex-direction: column; gap: 10px; margin-top: clamp(18px, 3vh, 28px); }
 .faq-item {
@@ -1031,11 +1058,15 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 .cmp-table { width: 100%; border-collapse: collapse; }
 .cmp-table th, .cmp-table td { padding: 13px clamp(12px, 1.3vw, 18px); text-align: left; }
 .cmp-table thead th {
-  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; color: #B8B5AD;
-  border-bottom: 1px solid var(--border-dark);
+  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; color: #F2F0EA;
+  padding-top: 16px; padding-bottom: 16px;
+  background: rgba(255,255,255,0.045);
+  border-bottom: 2px solid rgba(242,194,48,0.55);
 }
-.cmp-table thead th.cmp-wlp { color: var(--yellow); }
+/* The WLP header keeps the column's gold wash and takes the lead weight: it is
+   the answer the table is built to give. */
+.cmp-table thead th.cmp-wlp { color: var(--yellow); font-size: 15px; }
 .cmp-table tbody tr + tr th, .cmp-table tbody tr + tr td { border-top: 1px solid rgba(255,255,255,0.05); }
 .cmp-table tbody th {
   font-family: var(--font-body); font-weight: 600; font-size: 14px; color: #EDEAE3;
@@ -1135,7 +1166,11 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 /* ============ PHONE REFINEMENTS ============ */
 @media (max-width: 900px) {
   .faq-form-grid { grid-template-columns: 1fr; }
-  .audit-card { grid-template-columns: 1fr; }
+  .audit-body { grid-template-columns: 1fr; }
+  /* The video first on a phone: it is the part that earns the scroll, and the
+     two buttons stay within thumb reach at the bottom of the card. */
+  .audit-video { order: -1; }
+  .audit-cta { flex: 1 1 100%; }
   .footer-license { text-align: left; }
 
   /* The art gets a fixed share of the screen rather than whatever its own aspect
@@ -1355,6 +1390,23 @@ html.svc-open, html.svc-open body { overflow: hidden; }
    1000px of screen at the sizes above, so the type and the padding step down a
    notch rather than the section running off the bottom by a whole card. */
 @media (min-width: 901px) and (max-height: 900px) {
+  /* Section 3 takes the same step: four cards with a photo band, the kicker and
+     the four pillars overran a 720px screen by about a card's worth of height. */
+  /* Scoped to the panel: the desktop block sets these through
+     .panel--pledge .pledge-inner, which outranks a bare .pledge-inner. */
+  .panel--pledge .pledge-inner { padding-top: 12px; padding-bottom: 14px; gap: 10px; }
+  .pledge-kicker { font-size: 11px; }
+  .pledge-head h2 { font-size: clamp(21px, 2.1vw, 30px); }
+  .pledge-head .sub { font-size: 13.5px; line-height: 1.45; margin-top: 6px; }
+  .panel--pledge .cond-media { min-height: 74px; }
+  .cond-body { padding: 12px 13px 0; }
+  .cond-card h3 { font-size: 15px; margin: 8px 0 5px; }
+  .cond-card p { font-size: 12px; line-height: 1.38; margin-bottom: 8px; }
+  .panel--pledge .cond-card p { margin-bottom: 8px; }
+  .cond-foot { padding: 10px 13px; }
+  .panel--pledge .pledge-card { padding: 11px 13px; }
+  .panel--pledge .pledge-card p { font-size: 12px; line-height: 1.38; }
+
   .compare-inner { padding-top: 16px; padding-bottom: 18px; }
   .compare-head { margin-bottom: 14px; }
   .compare-content h2 { font-size: clamp(22px, 2.2vw, 30px); }

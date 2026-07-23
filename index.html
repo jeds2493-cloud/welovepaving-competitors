@@ -276,8 +276,8 @@
   <section class="panel panel--pledge" aria-label="The quality of our work" data-view="work_quality_view">
     <div class="pledge-inner">
       <header class="pledge-head">
-        <h2>See the Difference <span class="hl">Real Quality Makes.</span></h2>
-        <p class="sub">A finished lot can look fine on day one. What decides how long it holds up is the preparation, materials and workmanship underneath.</p>
+        <h2>Anyone Can Make It Look Good on Day One.<br><span class="hl">The Difference Shows in Year Three.</span></h2>
+        <p class="sub">Every lot looks the same the week it is finished. What decides whether it holds is the base, the material and who actually did the work, and none of that is visible once the last truck leaves.</p>
       </header>
 
       <!-- The four services we self-perform. Same card component as the striping and
@@ -289,7 +289,7 @@
           <div class="cond-body">
             <span class="cond-tag"><svg class="icon" aria-hidden="true"><use href="#i-road"/></svg>PAVING</span>
             <h3>Asphalt Paving</h3>
-            <p>Grading, base repair and paving by our own crews, built for the traffic your lot actually carries.</p>
+            <p><span class="cond-trap">Thin lifts over a base nobody repaired look identical for a season.</span> We grade, repair the base and pave with our own crews, for the traffic your lot actually carries.</p>
           </div>
           <div class="cond-media">
             <img src="images/svc-asphalt.webp" alt="A freshly paved asphalt drive curving between landscaped grounds on a We Love Paving job" width="760" height="355" loading="lazy" decoding="async">
@@ -302,7 +302,7 @@
           <div class="cond-body">
             <span class="cond-tag"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg>CONCRETE</span>
             <h3>Concrete Contractors</h3>
-            <p>Ramps, curbs and walkways poured in house, tied into the paving instead of handed to a second contractor.</p>
+            <p><span class="cond-trap">Most paving companies sub the concrete out, then point at each other when the ramp fails.</span> We pour ramps, curbs and walkways in house, tied into the paving.</p>
           </div>
           <div class="cond-media">
             <img src="images/svc-concrete.webp" alt="A newly poured concrete walkway and curb running along a commercial storefront" width="760" height="362" loading="lazy" decoding="async">
@@ -315,7 +315,7 @@
           <div class="cond-body">
             <span class="cond-tag"><svg class="icon" aria-hidden="true"><use href="#i-roller"/></svg>SEALCOATING</span>
             <h3>Sealcoating</h3>
-            <p>Applied on schedule and at the right coverage, so the surface you already paid for keeps its life instead of oxidizing early.</p>
+            <p><span class="cond-trap">Sealer cut with water and sprayed thin looks black for a month, then oxidizes.</span> We apply on schedule and at full coverage, so the surface you paid for keeps its life.</p>
           </div>
           <div class="cond-media">
             <img src="images/svc-sealcoating.webp" alt="A We Love Paving crew squeegeeing fresh sealcoat across a retail parking lot" width="760" height="362" loading="lazy" decoding="async">
@@ -328,7 +328,7 @@
           <div class="cond-body">
             <span class="cond-tag"><svg class="icon" aria-hidden="true"><use href="#i-accessible"/></svg>ACCESSIBLE</span>
             <h3>ADA Compliance</h3>
-            <p>Striping, ramps, signage and truncated domes corrected together, so an inspection is not a second project.</p>
+            <p><span class="cond-trap">Fresh striping still fails an inspection when the slopes and the domes are wrong.</span> We correct striping, ramps, signage and domes together, so compliance is not a second project.</p>
           </div>
           <div class="cond-media">
             <img src="images/svc-ada.webp" alt="A crew member laying an ADA accessible-parking stencil on a freshly striped lot" width="760" height="362" loading="lazy" decoding="async">
@@ -629,16 +629,39 @@
 <section class="lp-section audit-section" aria-label="Have your proposal reviewed" data-view="proposal_audit_view">
   <div class="lp-container">
     <div class="audit-card">
-      <div class="audit-copy">
-        <h2 class="lp-h2 audit-h2">Before you sign anyone, <span class="hl">let us read the fine print with you.</span></h2>
-        <p>Send us the proposal you are considering. A WLP Paving Advisor will show you what it protects, what it hides and what it will cost you in five years. No pressure, just the truth.</p>
-      </div>
-      <div class="audit-actions">
-        <a href="#p3-form" class="btn btn-primary" data-goto-form>Review My Proposal <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
-        <!-- PLACEHOLDER tracking number — swap for the comparison-campaign line. -->
-        <a href="tel:+18882730077" class="audit-phone" data-track-call="audit">
-          <svg class="icon icon-ring" aria-hidden="true"><use href="#i-phone"/></svg>(888) 273-0077
-        </a>
+      <h2 class="audit-h2">Before you sign anyone, <span class="hl">let us read the fine print with you.</span></h2>
+      <div class="audit-body">
+        <div class="audit-copy">
+          <p>Send us the proposal you are considering. A WLP Paving Advisor will show you what it protects, what it hides and what it will cost you in five years. No pressure, just the truth.</p>
+          <div class="audit-actions">
+            <a href="#p3-form" class="btn btn-primary audit-cta" data-goto-form>Review My Proposal <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+            <!-- PLACEHOLDER tracking number — swap for the comparison-campaign line. -->
+            <a href="tel:+18882730077" class="btn btn-outline audit-cta" data-track-call="audit">
+              <svg class="icon icon-ring" aria-hidden="true"><use href="#i-phone"/></svg>(888) 273-0077
+            </a>
+          </div>
+        </div>
+
+        <!-- PLACEHOLDER: the advisor's video goes here.
+             Drop the file in images/ (or a videos/ folder) and replace this whole
+             block with the player below, keeping the 16:9 box so nothing shifts:
+
+             <video class="audit-video" controls preload="none"
+                    poster="images/audit-video-poster.webp"
+                    width="1280" height="720">
+               <source src="videos/proposal-audit.mp4" type="video/mp4">
+             </video>
+
+             preload="none" on purpose: this sits well below the fold and the page
+             already defers the form embed for the same reason. -->
+        <div class="audit-video audit-video--empty" role="img"
+             aria-label="Placeholder for the Paving Advisor video, not yet published">
+          <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z"/>
+          </svg>
+          <span>Advisor video</span>
+        </div>
       </div>
     </div>
   </div>

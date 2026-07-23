@@ -137,6 +137,10 @@ removed from the `href`.
   company with a 15-year warranty. Everywhere else the page says "up to 15 years"
   on qualifying work. Legal should sign off on the exclusivity claim before this
   runs as paid traffic.
+- **Advisor video.** The proposal audit band ships with a dashed placeholder
+  where the video goes. `.audit-video` is a 16:9 box, so dropping the real
+  `<video>` in its place shifts nothing; the markup to paste is in an HTML
+  comment right above it. **This placeholder must not go live.**
 - **`og:image`** points at `https://www.welovepaving.com/images/hero-bg.webp`,
   which has to exist at that URL for link previews to work.
 
