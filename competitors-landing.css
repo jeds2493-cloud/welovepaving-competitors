@@ -1132,12 +1132,19 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 @media (max-width: 900px) {
   .compare-grid {
     display: flex; grid-template-columns: none;
-    gap: 14px;
+    gap: 10px;
     overflow-x: auto; overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
-    /* The deck sits inside the section's own padding, so the first and last card
-       can still centre. */
-    padding: 4px 0 8px;
+    /* A card's width as a real length, not a percentage, so the gutter below can
+       be derived from the same number and the two always agree. */
+    /* What is left over on each side is the gutter, and what shows of the next
+       card is that gutter minus the gap. At 82vw the two cancelled out and the
+       next card sat exactly on the edge, invisible. */
+    --card-w: min(72vw, 360px);
+    /* Half a card's shortfall on each side. Without it the first card starts
+       flush against the left edge, which reads as a deck already mid swipe, and
+       the last one can never reach the centre either. */
+    padding: 4px calc((100% - var(--card-w)) / 2) 8px;
     perspective: 900px;
     scrollbar-width: none; -ms-overflow-style: none;
   }
@@ -1145,7 +1152,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .compare-card {
     /* Not the full width: the sliver of the next card is what tells a reader
        there is one, before any dot does. */
-    flex: 0 0 82%;
+    flex: 0 0 var(--card-w);
     scroll-snap-align: center;
     /* Set per card by the script from its distance to the centre of the deck.
        The default keeps a card flat if the script never runs. */
@@ -1171,6 +1178,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
      folder index, and a half-width tab over a card this size read as a label
      that had come loose. */
   .card-tab { width: 100%; min-width: 0; }
+  /* Both top corners square, not just the left one: the tab now covers the whole
+     edge, and a rounded corner under a straight one left a notch of background
+     showing where they met. */
+  .compare-card .card-panel { border-radius: 0 0 10px 10px; }
 
   .compare-dots {
     display: flex; justify-content: center; gap: 9px;

@@ -708,15 +708,18 @@ if (deck) {
   const paint = () => {
     raf = 0;
     const mid = deck.scrollLeft + deck.clientWidth / 2;
+    const gap = parseFloat(getComputedStyle(deck).columnGap) || 0;
     let nearest = 0;
     let nearestGap = Infinity;
 
     cards.forEach((card, i) => {
       const cardMid = card.offsetLeft + card.offsetWidth / 2;
-      const step = card.offsetWidth + 14;
+      /* Read the gap from the deck rather than repeating the CSS number here:
+         they drifted apart once already. */
+      const step = card.offsetWidth + gap;
       const away = (cardMid - mid) / step;
-      const gap = Math.abs(cardMid - mid);
-      if (gap < nearestGap) { nearestGap = gap; nearest = i; }
+      const distance = Math.abs(cardMid - mid);
+      if (distance < nearestGap) { nearestGap = distance; nearest = i; }
       const tilt = Math.max(-1, Math.min(1, away)) * -MAX_TILT;
       card.style.setProperty('--tilt', tilt.toFixed(2) + 'deg');
     });
