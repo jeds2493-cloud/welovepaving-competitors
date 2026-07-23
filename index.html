@@ -42,6 +42,7 @@
     <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
     <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="m12 2.6 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.4l6.5-.9z"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
     <symbol id="i-road" viewBox="0 0 24 24"><path d="M4 19 8 5"/><path d="m16 5 4 14"/><path d="M12 5v3"/><path d="M12 11v3"/><path d="M12 17v3"/></symbol>
     <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
@@ -642,26 +643,25 @@
           </div>
         </div>
 
-        <!-- PLACEHOLDER: the advisor's video goes here.
-             Drop the file in images/ (or a videos/ folder) and replace this whole
-             block with the player below, keeping the 16:9 box so nothing shifts:
-
-             <video class="audit-video" controls preload="none"
-                    poster="images/audit-video-poster.webp"
-                    width="1280" height="720">
-               <source src="videos/proposal-audit.mp4" type="video/mp4">
-             </video>
-
-             preload="none" on purpose: this sits well below the fold and the page
-             already defers the form embed for the same reason. -->
-        <div class="audit-video audit-video--empty" role="img"
-             aria-label="Placeholder for the Paving Advisor video, not yet published">
-          <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z"/>
-          </svg>
-          <span>Advisor video</span>
-        </div>
+        <figure class="review">
+          <video class="review-video" controls preload="none" playsinline
+                 poster="images/review-pamela-poster.webp" width="640" height="360">
+            <source src="videos/review-pamela.mp4" type="video/mp4">
+            Your browser cannot play this video. Call us and a Paving Advisor will
+            walk you through the same thing.
+          </video>
+          <div class="review-body">
+            <p class="review-stars" role="img" aria-label="Rated 5 out of 5">
+              <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+              <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+              <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+              <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+              <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+            </p>
+            <blockquote class="review-quote">“I cannot say enough good things about We Love Paving.”</blockquote>
+            <figcaption class="review-by">Pamela <span>· Property owner, Northern California</span></figcaption>
+          </div>
+        </figure>
       </div>
     </div>
   </div>

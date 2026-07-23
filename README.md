@@ -21,6 +21,7 @@ competitors-landing.css    self-contained styles, no build step
 competitors-landing.js     reveals, modals, parallax, tracking
 legal/                     flattened copies of the 3 legal pages, opened in modals
 images/                    only the assets this page references
+videos/                    the customer review, served as is (already h264/aac)
 tools/                     build-time only (excluded from deploy via .vercelignore)
 vercel.json                security headers (see the caveat below)
 ```
@@ -49,7 +50,7 @@ to a welovepaving domain.
 | P3 | The quality of our work | four self-performed services + four quality pillars |
 | — | Proposal system | one band, six steps, what they send against what we send |
 | — | Compare + lead form | WLP-vs-typical comparison table beside the form |
-| — | Proposal audit | the last off ramp: have us read the proposal they already hold |
+| — | Proposal audit | have us read their proposal, with Pamela's review beside the ask |
 | — | FAQ | its own section above the footer |
 | — | Footer | legal links open in modals, nothing leaves the landing |
 
@@ -101,6 +102,11 @@ Images are sized to what they are actually displayed at, not to the source. If
 you regenerate one, keep the `width`/`height` attributes in step — they reserve
 the box and stop the layout shifting.
 
+The review video is 8.4MB and `preload="none"`, so nothing but its poster is
+fetched until someone presses play. It is remuxed with `+faststart` (the `moov`
+atom ahead of the data) so it starts on the first range request instead of after
+the whole file. It is not re-encoded: the source is already 640x360 h264/aac.
+
 The Google Fonts request only asks for the weights the CSS uses. Adding a
 `font-weight` that is not in that list gets a synthesised face, not a real one.
 
@@ -137,10 +143,6 @@ removed from the `href`.
   company with a 15-year warranty. Everywhere else the page says "up to 15 years"
   on qualifying work. Legal should sign off on the exclusivity claim before this
   runs as paid traffic.
-- **Advisor video.** The proposal audit band ships with a dashed placeholder
-  where the video goes. `.audit-video` is a 16:9 box, so dropping the real
-  `<video>` in its place shifts nothing; the markup to paste is in an HTML
-  comment right above it. **This placeholder must not go live.**
 - **`og:image`** points at `https://www.welovepaving.com/images/hero-bg.webp`,
   which has to exist at that URL for link previews to work.
 

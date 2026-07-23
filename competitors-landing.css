@@ -1014,18 +1014,32 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 }
 .audit-actions .icon { width: 17px; height: 17px; }
 
-/* 16:9, so swapping the placeholder for the real player shifts nothing. */
-.audit-video {
-  width: 100%; aspect-ratio: 16 / 9; border-radius: 12px;
-  background: #14120E; border: 1px solid var(--border-dark);
-  display: block; object-fit: cover;
+/* Social proof beside the ask: her own words, in her own voice, next to the
+   invitation to send us a proposal. */
+.review {
+  margin: 0; background: var(--bg-dark-2);
+  border: 1px solid var(--border-dark); border-radius: 12px; overflow: hidden;
 }
-.audit-video--empty {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  border-style: dashed; border-color: rgba(242,194,48,0.35); color: #8E8B84;
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+/* 16:9 with the poster covering it, so the card holds its shape before the file
+   is ever fetched. preload="none": two minutes of video has no business loading
+   for someone who never scrolls this far. */
+.review-video {
+  /* height: auto so the ratio governs. The width/height attributes map to CSS as
+     presentational hints, and the 360px one was overriding aspect-ratio and
+     stretching the poster. They stay: they reserve the box before the CSS lands. */
+  display: block; width: 100%; height: auto; aspect-ratio: 16 / 9;
+  background: #14120E; object-fit: cover;
 }
-.audit-video--empty .icon { width: 44px; height: 44px; color: rgba(242,194,48,0.55); }
+.review-body { padding: clamp(14px, 1.5vw, 20px); }
+.review-stars { display: flex; gap: 3px; margin-bottom: 9px; }
+.review-stars .icon { width: 17px; height: 17px; color: var(--yellow); }
+.review-quote {
+  margin: 0; font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(16px, 1.5vw, 20px); line-height: 1.22; color: #fff;
+  text-wrap: balance;
+}
+.review-by { margin-top: 10px; font-size: 13px; font-weight: 700; color: #E4E1DA; }
+.review-by span { font-weight: 400; color: #8E8B84; }
 
 .faq-list { display: flex; flex-direction: column; gap: 10px; margin-top: clamp(18px, 3vh, 28px); }
 .faq-item {
@@ -1174,9 +1188,9 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 @media (max-width: 900px) {
   .faq-form-grid { grid-template-columns: 1fr; }
   .audit-body { grid-template-columns: 1fr; }
-  /* The video first on a phone: it is the part that earns the scroll, and the
+  /* The review first on a phone: it is the part that earns the scroll, and the
      two buttons stay within thumb reach at the bottom of the card. */
-  .audit-video { order: -1; }
+  .review { order: -1; }
   .audit-cta { flex: 1 1 100%; }
   .footer-license { text-align: left; }
 
