@@ -128,6 +128,16 @@ Regenerate them with `tools/extract-legal.js` whenever Legal edits a page. If a
 fetch fails at runtime the modal falls back to the real link, which was never
 removed from the `href`.
 
+## Known limits
+
+- **The review video lives in the repo** (8.4MB), so git history carries it for
+  good. It is the only file of its kind here; a second one belongs on a CDN or in
+  the WordPress media library rather than in this tree.
+- **No automated tests.** Nothing stops a copy change from breaking the three
+  layout invariants this landing depends on: no horizontal overflow, P2 and P3
+  fitting one screen on desktop, and the modal moving the single lead form out
+  and back. They are checked by hand in the browser at 375, 720, 900 and 1440.
+
 ## Copy conventions
 
 - **"Paving Advisor"**, never "project advisor" or "sales rep".
@@ -150,6 +160,11 @@ removed from the `href`.
   company with a 15-year warranty. Everywhere else the page says "up to 15 years"
   on qualifying work. Legal should sign off on the exclusivity claim before this
   runs as paid traffic.
+- **Captions for the review video.** It ships without a `<track>`, so it fails
+  WCAG 1.2.2, which asks for captions on prerecorded video that carries audio.
+  The fix is a `videos/review-pamela.vtt` and one `<track kind="captions"
+  srclang="en" label="English" default>` inside the `<video>`. Nobody has
+  transcribed it yet, and an invented transcript would be worse than none.
 - **`og:image`** points at `https://www.welovepaving.com/images/hero-bg.webp`,
   which has to exist at that URL for link previews to work.
 
