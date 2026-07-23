@@ -736,9 +736,27 @@ if (deck) {
 
   const onScroll = () => { if (!raf) raf = requestAnimationFrame(paint); };
 
+  /* The tilt goes on a wrapper, not on the card: a snap position is measured off
+     the transformed box, so tilting the card itself drags its own snap point
+     along and the deck settles a few pixels short of centre. */
+  const wrap = (card) => {
+    if (card.firstElementChild && card.firstElementChild.classList.contains('card-3d')) return;
+    const inner = document.createElement('div');
+    inner.className = 'card-3d';
+    inner.append(...card.childNodes);
+    card.append(inner);
+  };
+  const unwrap = (card) => {
+    const inner = card.firstElementChild;
+    if (!inner || !inner.classList.contains('card-3d')) return;
+    card.append(...inner.childNodes);
+    inner.remove();
+  };
+
   const enable = () => {
     if (deck.classList.contains('is-carousel')) return;
     deck.classList.add('is-carousel');
+    cards.forEach(wrap);
     /* A region you can scroll has to be reachable without a pointer. */
     deck.tabIndex = 0;
     deck.setAttribute('role', 'group');
@@ -777,7 +795,7 @@ if (deck) {
     deck.removeAttribute('aria-label');
     deck.removeEventListener('scroll', onScroll);
     if (dots) { dots.remove(); dots = null; }
-    cards.forEach((card) => card.style.removeProperty('--tilt'));
+    cards.forEach((card) => { unwrap(card); card.style.removeProperty('--tilt'); });
     active = -1;
   };
 

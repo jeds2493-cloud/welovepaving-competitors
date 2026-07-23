@@ -1154,8 +1154,17 @@ html.svc-open, html.svc-open body { overflow: hidden; }
        there is one, before any dot does. */
     flex: 0 0 var(--card-w);
     scroll-snap-align: center;
-    /* Set per card by the script from its distance to the centre of the deck.
-       The default keeps a card flat if the script never runs. */
+  }
+  /* The tilt lives on a wrapper the script adds inside each card, never on the
+     card itself. Snap positions are computed from the transformed box, so a card
+     tilted 26 degrees moves its own snap point: the deck would land a few pixels
+     short, then the script would flatten the card and it would sit visibly off
+     centre. Rotating a child leaves the snap geometry alone.
+
+     Set per card by the script from its distance to the centre of the deck. The
+     default keeps a card flat if the script never runs. */
+  .card-3d {
+    display: flex; flex-direction: column; height: 100%;
     transform: perspective(900px) rotateY(var(--tilt, 0deg));
     transform-origin: center center;
   }
@@ -1171,7 +1180,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .compare-grid.is-carousel .compare-card,
   .compare-grid.is-carousel .compare-card.is-in {
     opacity: 1;
-    transform: perspective(900px) rotateY(var(--tilt, 0deg));
+    transform: none;
     transition: none;
   }
   /* The tab runs the full width of the card here. One card at a time is not a
@@ -1199,8 +1208,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .compare-grid:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
 }
 @media (max-width: 900px) and (prefers-reduced-motion: reduce) {
-  .compare-grid.is-carousel .compare-card,
-  .compare-grid.is-carousel .compare-card.is-in { transform: none; }
+  .compare-grid.is-carousel .card-3d { transform: none; }
   .compare-grid { scroll-behavior: auto; }
 }
 
