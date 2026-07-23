@@ -76,7 +76,14 @@ to a welovepaving domain.
   moved into the modal and put back on close rather than duplicated — a second
   embed would mean a second iframe and a second conversion tag.
 - **Legal modals**: same component as the striping and concrete landings.
-- **One screen for P2**: the six cards have to fit under the chrome without
+- **P2 is a carousel below 900px.** Six full-height cards stacked was most of a
+  phone screen each. The deck is CSS scroll snap, not a drag handler: momentum,
+  rubber banding, snap points and keyboard scrolling all come from the platform.
+  The script adds only the dots and the tilt on the cards either side, and tears
+  both down again above 900px, where the grid returns. Ported from the React Bits
+  `<Carousel>` without its infinite loop, which on a scroll container means
+  cloned cards and a silent jump fighting momentum mid-flight.
+- **One screen for P2** (desktop): the six cards have to fit under the chrome without
   scrolling. Their rows are sized by content rather than by an even split of the
   leftover height, which packed every card to its last pixel; below 900px of
   viewport height a separate step drops the type and spacing a notch, because two

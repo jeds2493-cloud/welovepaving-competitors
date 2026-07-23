@@ -1120,6 +1120,64 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 .cmp-note {
   margin-top: 12px; font-size: 11.5px; line-height: 1.5; color: #7A756A;
 }
+/* ============ P2 CAROUSEL (mobile) ============
+   Six full cards stacked was most of a phone screen each and a long scroll to
+   nothing. They become one deck you swipe through instead.
+
+   Built on scroll snap rather than a drag handler: the platform already gives
+   momentum, rubber banding, snap points and keyboard scrolling for free, and on
+   a page with no build step that is a lot of behaviour not to hand roll. What JS
+   adds is only what scroll snap has no answer for, the dots and the tilt on the
+   cards either side. */
+@media (max-width: 900px) {
+  .compare-grid {
+    display: flex; grid-template-columns: none;
+    gap: 14px;
+    overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    /* The deck sits inside the section's own padding, so the first and last card
+       can still centre. */
+    padding: 4px 0 8px;
+    perspective: 900px;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .compare-grid::-webkit-scrollbar { display: none; }
+  .compare-card {
+    /* Not the full width: the sliver of the next card is what tells a reader
+       there is one, before any dot does. */
+    flex: 0 0 82%;
+    scroll-snap-align: center;
+    /* Set per card by the script from its distance to the centre of the deck.
+       The default keeps a card flat if the script never runs. */
+    transform: perspective(900px) rotateY(var(--tilt, 0deg));
+    transform-origin: center center;
+  }
+  /* The sideways reveal is off here: the cards enter translated, and inside a
+     scroll container that fights the snap and leaves the deck parked between two
+     cards. The carousel is its own entrance. */
+  .compare-grid .compare-card { opacity: 1; }
+  .compare-grid.is-carousel .compare-card { transition: none; }
+
+  .compare-dots {
+    display: flex; justify-content: center; gap: 9px;
+    margin-top: 14px;
+  }
+  .compare-dot {
+    width: 9px; height: 9px; padding: 0; border: 0; border-radius: 50%;
+    background: #4A4438; cursor: pointer;
+    transition: background-color 150ms var(--ease-mech), transform 150ms var(--ease-mech);
+  }
+  .compare-dot[aria-current="true"] { background: var(--yellow); transform: scale(1.25); }
+  .compare-dot:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+  /* A scrollable region has to be reachable by keyboard, and the script gives it
+     a tabindex to make that true. */
+  .compare-grid:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
+}
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .compare-card { transform: none; }
+  .compare-grid { scroll-behavior: auto; }
+}
+
 /* Below the two-column break the table is full width and can shrink its type. */
 @media (max-width: 900px) {
   .cmp-wrap { overflow-x: auto; }

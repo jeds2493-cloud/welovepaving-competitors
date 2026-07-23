@@ -680,3 +680,105 @@ document.querySelectorAll('.compare-card, .cond-card, .proposal-strip').forEach(
   io.observe(card);
 });
 
+/* ---------- P2 carousel (mobile) ----------
+   The six comparison cards become one swipeable deck below 900px. The track and
+   the snapping are CSS; this adds the two things scroll snap has no answer for:
+   the dots, and the tilt that turns the cards either side of the current one
+   away from the reader.
+
+   Ported from the React Bits <Carousel>, minus its drag handler and its infinite
+   loop. The drag is what the platform already does better on a touch screen, and
+   looping needs cloned cards plus a silent jump at each end, which on a scroll
+   container means fighting momentum mid-flight. Six cards and a row of dots do
+   not need it. */
+const carouselMQ = window.matchMedia('(max-width: 900px)');
+const deck = document.querySelector('.compare-grid');
+
+if (deck) {
+  const cards = [...deck.querySelectorAll('.compare-card')];
+  let dots = null;
+  let raf = 0;
+  let active = -1;
+
+  /* The React component maps a full card of travel to a quarter turn. Here the
+     neighbours are still partly on screen, so it is gentler: an edge-on card
+     beside the one being read is a distraction, not depth. */
+  const MAX_TILT = 26;
+
+  const paint = () => {
+    raf = 0;
+    const mid = deck.scrollLeft + deck.clientWidth / 2;
+    let nearest = 0;
+    let nearestGap = Infinity;
+
+    cards.forEach((card, i) => {
+      const cardMid = card.offsetLeft + card.offsetWidth / 2;
+      const step = card.offsetWidth + 14;
+      const away = (cardMid - mid) / step;
+      const gap = Math.abs(cardMid - mid);
+      if (gap < nearestGap) { nearestGap = gap; nearest = i; }
+      const tilt = Math.max(-1, Math.min(1, away)) * -MAX_TILT;
+      card.style.setProperty('--tilt', tilt.toFixed(2) + 'deg');
+    });
+
+    if (nearest !== active) {
+      active = nearest;
+      if (dots) {
+        [...dots.children].forEach((dot, i) => {
+          dot.setAttribute('aria-current', String(i === active));
+        });
+      }
+    }
+  };
+
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(paint); };
+
+  const enable = () => {
+    if (deck.classList.contains('is-carousel')) return;
+    deck.classList.add('is-carousel');
+    /* A region you can scroll has to be reachable without a pointer. */
+    deck.tabIndex = 0;
+    deck.setAttribute('role', 'group');
+    deck.setAttribute('aria-roledescription', 'carousel');
+    deck.setAttribute('aria-label', 'What to compare, one card at a time');
+
+    dots = document.createElement('div');
+    dots.className = 'compare-dots';
+    cards.forEach((card, i) => {
+      const tab = card.querySelector('.card-tab span');
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'compare-dot';
+      dot.setAttribute('aria-label', 'Show ' + (tab ? tab.textContent.trim() : 'card ' + (i + 1)));
+      dot.addEventListener('click', () => {
+        card.scrollIntoView({
+          behavior: reducedMQ.matches ? 'auto' : 'smooth',
+          inline: 'center',
+          block: 'nearest',
+        });
+      });
+      dots.appendChild(dot);
+    });
+    deck.after(dots);
+
+    deck.addEventListener('scroll', onScroll, { passive: true });
+    paint();
+  };
+
+  const disable = () => {
+    if (!deck.classList.contains('is-carousel')) return;
+    deck.classList.remove('is-carousel');
+    deck.removeAttribute('tabindex');
+    deck.removeAttribute('role');
+    deck.removeAttribute('aria-roledescription');
+    deck.removeAttribute('aria-label');
+    deck.removeEventListener('scroll', onScroll);
+    if (dots) { dots.remove(); dots = null; }
+    cards.forEach((card) => card.style.removeProperty('--tilt'));
+    active = -1;
+  };
+
+  const sync = () => (carouselMQ.matches ? enable() : disable());
+  sync();
+  carouselMQ.addEventListener('change', sync);
+}
