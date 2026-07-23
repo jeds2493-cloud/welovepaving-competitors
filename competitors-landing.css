@@ -1154,9 +1154,23 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   }
   /* The sideways reveal is off here: the cards enter translated, and inside a
      scroll container that fights the snap and leaves the deck parked between two
-     cards. The carousel is its own entrance. */
-  .compare-grid .compare-card { opacity: 1; }
-  .compare-grid.is-carousel .compare-card { transition: none; }
+     cards. The carousel is its own entrance.
+
+     Both selectors are needed and both have to outrank the reveal, which sets
+     transform through `.compare-card:nth-child(even)` and clears it again through
+     `.compare-card.is-in`. Either one beats a bare `.compare-card` on
+     specificity, so before this the even cards sat 48px off to the right until
+     the observer fired, and the tilt never rendered at all once it had. */
+  .compare-grid.is-carousel .compare-card,
+  .compare-grid.is-carousel .compare-card.is-in {
+    opacity: 1;
+    transform: perspective(900px) rotateY(var(--tilt, 0deg));
+    transition: none;
+  }
+  /* The tab runs the full width of the card here. One card at a time is not a
+     folder index, and a half-width tab over a card this size read as a label
+     that had come loose. */
+  .card-tab { width: 100%; min-width: 0; }
 
   .compare-dots {
     display: flex; justify-content: center; gap: 9px;
@@ -1174,7 +1188,8 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .compare-grid:focus-visible { outline: 3px solid var(--yellow); outline-offset: 4px; }
 }
 @media (max-width: 900px) and (prefers-reduced-motion: reduce) {
-  .compare-card { transform: none; }
+  .compare-grid.is-carousel .compare-card,
+  .compare-grid.is-carousel .compare-card.is-in { transform: none; }
   .compare-grid { scroll-behavior: auto; }
 }
 
