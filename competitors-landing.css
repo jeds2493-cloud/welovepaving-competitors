@@ -1133,7 +1133,16 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .compare-grid {
     display: flex; grid-template-columns: none;
     gap: 10px;
-    overflow-x: auto; overscroll-behavior-x: contain;
+    /* Both axes stated. overflow-x on its own coerces the other axis to auto, so
+       the deck became a vertical scroller too: it held 3px of slack and a card
+       could be dragged up and down inside its own box, and that gesture went to
+       the deck instead of scrolling the page. Horizontal only now.
+
+       touch-action is deliberately left alone. Restricting it to pan-x would
+       block a vertical swipe that starts on a card, and on a phone the deck is
+       most of the screen: the page would feel stuck wherever a thumb landed. */
+    overflow-x: auto; overflow-y: hidden;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     /* A card's width as a real length, not a percentage, so the gutter below can
        be derived from the same number and the two always agree. */
@@ -1144,7 +1153,7 @@ html.svc-open, html.svc-open body { overflow: hidden; }
     /* Half a card's shortfall on each side. Without it the first card starts
        flush against the left edge, which reads as a deck already mid swipe, and
        the last one can never reach the centre either. */
-    padding: 4px calc((100% - var(--card-w)) / 2) 8px;
+    padding: 4px calc((100% - var(--card-w)) / 2) 12px;
     perspective: 900px;
     scrollbar-width: none; -ms-overflow-style: none;
   }
