@@ -993,6 +993,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em;
   font-size: clamp(24px, 3vw, 42px); line-height: 1.06; text-transform: uppercase;
   color: #fff; text-wrap: balance;
+  /* Centred across the band rather than ranged left over the copy column: it is
+     one sentence spanning the full width, and left aligned it hung off the
+     video's edge instead of heading the whole card. */
+  text-align: center; margin-inline: auto;
 }
 .audit-h2 .hl { color: var(--yellow); }
 .audit-body {
@@ -1058,15 +1062,15 @@ html.svc-open, html.svc-open body { overflow: hidden; }
 .cmp-table { width: 100%; border-collapse: collapse; }
 .cmp-table th, .cmp-table td { padding: 13px clamp(12px, 1.3vw, 18px); text-align: left; }
 .cmp-table thead th {
-  font-family: var(--font-mono); font-size: 13px; font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase; color: #F2F0EA;
-  padding-top: 16px; padding-bottom: 16px;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; color: #F2F0EA;
+  padding-top: 18px; padding-bottom: 18px; line-height: 1.25;
   background: rgba(255,255,255,0.045);
   border-bottom: 2px solid rgba(242,194,48,0.55);
 }
 /* The WLP header keeps the column's gold wash and takes the lead weight: it is
    the answer the table is built to give. */
-.cmp-table thead th.cmp-wlp { color: var(--yellow); font-size: 15px; }
+.cmp-table thead th.cmp-wlp { color: var(--yellow); font-size: 18px; }
 .cmp-table tbody tr + tr th, .cmp-table tbody tr + tr td { border-top: 1px solid rgba(255,255,255,0.05); }
 .cmp-table tbody th {
   font-family: var(--font-body); font-weight: 600; font-size: 14px; color: #EDEAE3;
@@ -1112,7 +1116,10 @@ html.svc-open, html.svc-open body { overflow: hidden; }
   .cmp-table th, .cmp-table td { padding: 11px 10px; }
   .cmp-table tbody th { font-size: 13px; }
   .cmp-no { font-size: 12.5px; }
-  .cmp-table thead th { font-size: 9.5px; letter-spacing: 0.06em; }
+  /* Still the loudest row on a phone, just scaled to a 54px check column: the
+     desktop sizes here left the two text headers wrapping four lines deep. */
+  .cmp-table thead th { font-size: 11.5px; letter-spacing: 0.04em; padding-top: 13px; padding-bottom: 13px; }
+  .cmp-table thead th.cmp-wlp { font-size: 13px; }
   .cmp-yes .icon { width: 19px; height: 19px; }
 }
 
